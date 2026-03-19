@@ -1,0 +1,15 @@
+export const COLORS = {
+  ghostBlue: '#F4F5FB',
+  deepNavy: '#2E3148',
+  periwinkleMist: '#C5D4F5',
+  skyIris: '#A3B8EE',
+  softCobalt: '#7B9DE0',
+  mutedSapphire: '#5578C8',
+  dustyTangerine: '#E8784F',
+  warmMelon: '#F4A07E',
+  apricotBlush: '#F9BFA3',
+  peachyCream: '#FCDAC8',
+  lilacHaze: '#E8EAF4',
+  blueTonedSlate: '#5A5E78',
+  error: '#D32F2F',
+};
