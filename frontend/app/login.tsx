@@ -41,16 +41,7 @@ export default function LoginScreen() {
 
     try {
       // TODO: Replace with your real auth API call
-      // const response = await fetch('https://swipers.onrender.com/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password }),
-      // });
-      // if (!response.ok) throw new Error('Account not found');
-      // const data = await response.json();
-      // router.replace('/(tabs)');
-
-      // --- Simulated login for development (remove when API is ready) ---
+      // Simulated login for development (remove when API is ready)
       await new Promise((res) => setTimeout(res, 1000));
       throw new Error('Account not found');
     } catch {
@@ -89,7 +80,7 @@ export default function LoginScreen() {
             <Text style={styles.title}>Login</Text>
             <Text style={styles.subtitle}>Enter your email and password to log in</Text>
 
-            {/* Email Field — no eye icon */}
+            {/* Email Field */}
             <Text style={styles.label}>Email</Text>
             <View style={styles.inputWrapper}>
               <TextInput
@@ -105,32 +96,32 @@ export default function LoginScreen() {
             </View>
 
             {/* Password Field — with eye toggle */}
-<Text style={styles.label}>Password</Text>
-<View style={styles.inputWrapper}>
-  <TextInput
-    ref={passwordRef}
-    style={styles.input}
-    placeholder="Enter your password"
-    placeholderTextColor={COLORS.blueTonedSlate}
-    value={password}
-    onChangeText={(val) => { setPassword(val); setError(false); }}
-    secureTextEntry={!showPassword}
-    autoCapitalize="none"
-    autoCorrect={false}
-    autoComplete="off"
-    textContentType="oneTimeCode"
-  />
-  <TouchableOpacity onPress={() => {
-    setShowPassword(!showPassword);
-    setTimeout(() => passwordRef.current?.focus(), 10);
-  }}>
-    <Ionicons
-      name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-      size={18}
-      color={COLORS.blueTonedSlate}
-    />
-  </TouchableOpacity>
-</View>
+            <Text style={styles.label}>Password</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                ref={passwordRef}
+                style={styles.input}
+                placeholder="Enter your password"
+                placeholderTextColor={COLORS.blueTonedSlate}
+                value={password}
+                onChangeText={(val) => { setPassword(val); setError(false); }}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="off"
+                textContentType="oneTimeCode"
+              />
+              <TouchableOpacity onPress={() => {
+                setShowPassword(!showPassword);
+                setTimeout(() => passwordRef.current?.focus(), 10);
+              }}>
+                <Ionicons
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={18}
+                  color={COLORS.blueTonedSlate}
+                />
+              </TouchableOpacity>
+            </View>
 
             {/* Remember Me + Forgot Password */}
             <View style={styles.row}>
@@ -189,7 +180,7 @@ export default function LoginScreen() {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────
+// Styles
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
