@@ -58,7 +58,7 @@ export default function SignupScreen() {
       } else if (email === 'exists@test.com') {
         setErrorState('exists'); 
       } else {
-        router.replace('/(tabs)');
+        router.replace('/onboarding');
       }
     } catch (e) {
       setErrorState('exists');

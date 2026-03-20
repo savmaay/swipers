@@ -8,6 +8,7 @@ import {
   Image,
   Dimensions,
   ScrollView,
+  PanResponder,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -66,6 +67,7 @@ export default function IntroScreen() {
   const fadeAnim  = useRef(new Animated.Value(0)).current;
   const foxBounce = useRef(new Animated.Value(0)).current;
   const ctaFade   = useRef(new Animated.Value(0)).current;
+  const dragX     = useRef(new Animated.Value(0)).current; // follows finger during swipe
 
   const [displayedText, setDisplayedText] = useState('');
   const [typingDone, setTypingDone]       = useState(false);
@@ -97,14 +99,45 @@ export default function IntroScreen() {
     return () => clearTimeout(startDelay);
   }, []);
 
+  // Swipe right anywhere on screen to go to card-demo
+  // dragX follows the finger so user can see the swipe happening
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gesture) =>
+        gesture.dx > 10 && Math.abs(gesture.dx) > Math.abs(gesture.dy),
+      onPanResponderMove: (_, gesture) => {
+        // Screen follows finger at 40% speed so swipe is visible
+        if (gesture.dx > 0) {
+          dragX.setValue(gesture.dx * 0.4);
+        }
+      },
+      onPanResponderRelease: (_, gesture) => {
+        if (gesture.dx > 80) {
+          // Finish sliding off screen then navigate
+          Animated.timing(dragX, {
+            toValue: SCREEN_WIDTH,
+            duration: 250,
+            useNativeDriver: true,
+          }).start(() => router.replace('/onboarding/card-demo'));
+        } else {
+          // Snap back if not swiped far enough
+          Animated.spring(dragX, { toValue: 0, useNativeDriver: true }).start();
+        }
+      },
+    })
+  ).current;
+
   if (!fontsLoaded) return null;
 
   return (
     <LinearGradient
       colors={[COLORS.warmMelon, COLORS.apricotBlush, COLORS.peachyCream]}
       style={styles.gradient}
+      {...panResponder.panHandlers}
     >
-      <Animated.View style={[styles.absoluteLayer, { opacity: fadeAnim }]}>
+      {/* Content slides with finger */}
+      <Animated.View style={[styles.absoluteLayer, { opacity: fadeAnim, transform: [{ translateX: dragX }] }]}>
 
         {/* ── Fox — absolutely positioned ── */}
         <Animated.View
