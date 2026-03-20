@@ -182,7 +182,7 @@ export default function InterestsScreen() {
   const fontsLoaded  = useAppFonts();
   const [selected, setSelected] = useState<string[]>([]);
   const fadeAnim     = useRef(new Animated.Value(0)).current;
-  const slideAnim    = useRef(new Animated.Value(0)).current;
+  const dragY        = useRef(new Animated.Value(0)).current; // follows finger during swipe
   const hasNavigated = useRef(false);
   const canContinueRef = useRef(false); 
 
@@ -200,13 +200,7 @@ export default function InterestsScreen() {
   const navigate = () => {
     if (!canContinueRef.current || hasNavigated.current) return;
     hasNavigated.current = true;
-    Animated.timing(slideAnim, {
-      toValue: -800,
-      duration: 400,
-      useNativeDriver: true,
-    }).start(() => {
-      router.replace('/(tabs)');
-    });
+    router.replace('/(tabs)');
   };
 
   const panResponder = useRef(
@@ -216,9 +210,23 @@ export default function InterestsScreen() {
         canContinueRef.current &&
         gesture.dy < -10 &&
         Math.abs(gesture.dy) > Math.abs(gesture.dx), 
+      onPanResponderMove: (_, gesture) => {
+        // Screen follows finger upward so user can see the swipe happening
+        if (gesture.dy < 0) {
+          dragY.setValue(gesture.dy * 0.4);
+        }
+      },
       onPanResponderRelease: (_, gesture) => {
         if (gesture.dy < SWIPE_UP_THRESHOLD) {
-          navigate();
+          // Finish sliding off screen then navigate
+          Animated.timing(dragY, {
+            toValue: -800,
+            duration: 250,
+            useNativeDriver: true,
+          }).start(() => navigate());
+        } else {
+          // Snap back if not swiped far enough
+          Animated.spring(dragY, { toValue: 0, useNativeDriver: true }).start();
         }
       },
     })
@@ -243,7 +251,7 @@ export default function InterestsScreen() {
     >
       {/* PanResponder on the whole screen */}
       <Animated.View
-        style={[styles.wrapper, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}
+        style={[styles.wrapper, { opacity: fadeAnim, transform: [{ translateY: dragY }] }]}
         {...panResponder.panHandlers}
       >
         {/* Header */}
@@ -304,7 +312,7 @@ export default function InterestsScreen() {
             {canContinue ? (
               <View style={styles.swipeUpRow}>
                 <AnimatedUpArrow />
-                <Text style={styles.continueText}>Finish</Text>
+                <Text style={styles.continueText}>Swipe Up to Finish</Text>
                 <AnimatedUpArrow />
               </View>
             ) : (
