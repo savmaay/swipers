@@ -111,7 +111,7 @@ export default function SignupScreen() {
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="Enter your full email"
+                placeholder="Enter your email"
                 placeholderTextColor={COLORS.blueTonedSlate}
                 value={email}
                 onChangeText={(val) => { setEmail(val); setErrorState('none'); }}

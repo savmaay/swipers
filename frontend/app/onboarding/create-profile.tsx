@@ -11,14 +11,13 @@ import {
   Image,
   ActivityIndicator
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker'; 
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
 
-
-// Updated Map with your new assets
 const AVATAR_MAP = {
   cat: require('../../assets/images/avatar_cat.png'),
   dog: require('../../assets/images/avatar_dog.png'),
@@ -28,26 +27,22 @@ const AVATAR_MAP = {
   gator: require('../../assets/images/avatar_gator.png'),
 };
 
-
 type AvatarKey = keyof typeof AVATAR_MAP;
-
 
 export default function CreateProfileScreen() {
   const [name, setName] = useState<string>('');
-  const [year, setYear] = useState<string>('');
+  const [year, setYear] = useState<string>('1st'); 
   const [major, setMajor] = useState<string>('');
   const [bio, setBio] = useState<string>('');
- 
+  
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarKey>('cat');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
-
   const fontsLoaded = useAppFonts();
 
-
   const handleAllDone = async () => {
-    if (!name.trim() || !year.trim() || !major.trim() || !bio.trim()) {
+    if (!name.trim() || !year.trim() || !major.trim()) {
       setError(true);
       return;
     }
@@ -63,9 +58,7 @@ export default function CreateProfileScreen() {
     }
   };
 
-
   if (!fontsLoaded) return null;
-
 
   return (
     <LinearGradient
@@ -84,8 +77,6 @@ export default function CreateProfileScreen() {
           <View style={styles.card}>
             <Text style={styles.title}>Create Your Profile</Text>
 
-
-            {/* Large Preview Circle */}
             <View style={styles.avatarDisplayContainer}>
               <View style={styles.avatarCircleFrame}>
                 <Image
@@ -95,8 +86,6 @@ export default function CreateProfileScreen() {
               </View>
             </View>
 
-
-            {/* Inputs */}
             <View style={styles.row}>
               <View style={[styles.fieldColumn, { flex: 2.5, marginRight: 12 }]}>
                 <Text style={styles.label}>Name</Text>
@@ -108,19 +97,26 @@ export default function CreateProfileScreen() {
                   onChangeText={(val) => { setName(val); setError(false); }}
                 />
               </View>
-              <View style={[styles.fieldColumn, { flex: 1 }]}>
+              
+              <View style={[styles.fieldColumn, { flex: 1.5 }]}>
                 <Text style={styles.label}>Year</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Year"
-                  placeholderTextColor={COLORS.blueTonedSlate}
-                  keyboardType="numeric"
-                  value={year}
-                  onChangeText={(val) => { setYear(val); setError(false); }}
-                />
+                <View style={styles.pickerWrapper}>
+                  <Picker
+                    selectedValue={year}
+                    onValueChange={(itemValue) => setYear(itemValue)}
+                    style={styles.picker}
+                    itemStyle={styles.pickerItem}
+                    dropdownIconColor={COLORS.deepNavy}
+                  >
+                    <Picker.Item label="1st" value="1st" />
+                    <Picker.Item label="2nd" value="2nd" />
+                    <Picker.Item label="3rd" value="3rd" />
+                    <Picker.Item label="4th" value="4th" />
+                    <Picker.Item label="5th+" value="5th+" />
+                  </Picker>
+                </View>
               </View>
             </View>
-
 
             <Text style={styles.label}>Major</Text>
             <TextInput
@@ -131,8 +127,10 @@ export default function CreateProfileScreen() {
               onChangeText={(val) => { setMajor(val); setError(false); }}
             />
 
-
-            <Text style={styles.label}>Bio</Text>
+            <View style={styles.labelRow}>
+               <Text style={styles.label}>Bio</Text>
+               <Text style={styles.optionalTag}>(Optional)</Text>
+            </View>
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Tell us about yourself!"
@@ -142,8 +140,6 @@ export default function CreateProfileScreen() {
               onChangeText={(val) => { setBio(val); setError(false); }}
             />
 
-
-            {/* Horizontal Avatar Selector */}
             <Text style={styles.pickerTitle}>Choose your avatar!</Text>
             <View style={styles.scrollWrapper}>
               <ScrollView
@@ -167,7 +163,6 @@ export default function CreateProfileScreen() {
               </ScrollView>
             </View>
 
-
             <TouchableOpacity
               style={styles.button}
               onPress={handleAllDone}
@@ -180,9 +175,8 @@ export default function CreateProfileScreen() {
               )}
             </TouchableOpacity>
 
-
             {error && (
-              <Text style={styles.errorText}>Please fill out the correct fields</Text>
+              <Text style={styles.errorText}>Please fill out the required fields</Text>
             )}
           </View>
         </ScrollView>
@@ -190,7 +184,6 @@ export default function CreateProfileScreen() {
     </LinearGradient>
   );
 }
-
 
 const styles = StyleSheet.create({
   gradient: { flex: 1 },
@@ -240,14 +233,26 @@ const styles = StyleSheet.create({
     height: 75,
     resizeMode: 'contain',
   },
-  row: { flexDirection: 'row' },
+  row: { flexDirection: 'row', alignItems: 'flex-end' },
   fieldColumn: { marginBottom: 12 },
+  labelRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+    marginTop: 18,
+  },
   label: {
     fontFamily: FONTS.body,
     fontSize: 13,
     color: COLORS.softCobalt,
     marginBottom: 4,
     marginLeft: 4,
+  },
+  optionalTag: {
+    fontSize: 11,
+    color: COLORS.blueTonedSlate,
+    fontFamily: FONTS.body,
+    marginRight: 4,
   },
   input: {
     backgroundColor: '#fff',
@@ -258,18 +263,45 @@ const styles = StyleSheet.create({
     color: COLORS.deepNavy,
     borderWidth: 1,
     borderColor: 'rgba(197, 212, 245, 0.4)',
+    height: 48,
+  },
+  pickerWrapper: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(197, 212, 245, 0.4)',
+    height: 48, 
+    justifyContent: 'center',
+  },
+  picker: {
+    width: '100%',
+    backgroundColor: 'transparent', 
+    ...Platform.select({
+        ios: {
+            height: 40,
+            marginTop: -8, 
+        },
+        android: {
+            height: 40,
+        }
+    })
+  },
+  pickerItem: {
+    fontSize: 15,
+    height: 48,
+    fontFamily: FONTS.body,
+    color: COLORS.deepNavy,
   },
   textArea: {
     height: 60,
     textAlignVertical: 'top',
-    marginBottom: 10,
   },
   pickerTitle: {
     fontFamily: FONTS.body,
     fontSize: 14,
     color: '#1565C0',
     textAlign: 'center',
-    marginTop: 15,
+    marginTop: 25, 
     marginBottom: 10,
   },
   scrollWrapper: {
@@ -279,7 +311,7 @@ const styles = StyleSheet.create({
   pickerScrollContent: {
     paddingHorizontal: 5,
     alignItems: 'center',
-    gap: 12, // Space between avatars
+    gap: 12,
   },
   avatarBox: {
     width: 70,
