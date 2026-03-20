@@ -356,10 +356,11 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.6)',
   },
   mascot: {
-    width: 80, height: 80,
+    width: 120, height: 120,
     alignSelf: 'center',
-    marginBottom: 8,
+    marginBottom: -14,
     resizeMode: 'contain',
+    marginTop: -30,
   },
   title: {
     fontFamily: FONTS.heading,
@@ -370,7 +371,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontFamily: FONTS.body,
-    fontSize: 13,
+    fontSize: 17,
     color: COLORS.softCobalt,
     textAlign: 'center',
     marginBottom: 20,

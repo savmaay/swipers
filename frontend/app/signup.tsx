@@ -243,11 +243,11 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   mascot: {
-    width: 80,
-    height: 80,
+    width: 120, height: 120,
     alignSelf: 'center',
-    marginBottom: 5,
+    marginBottom: -14,
     resizeMode: 'contain',
+    marginTop: -30,
   },
   title: {
     fontFamily: FONTS.heading,
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontFamily: FONTS.body,
-    fontSize: 14,
+    fontSize: 18,
     color: COLORS.softCobalt,
     textAlign: 'center',
     marginBottom: 20,
