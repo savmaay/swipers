@@ -5,8 +5,11 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
-  Dimensions,
+  Image,
+  ActivityIndicator
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -14,209 +17,311 @@ import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// ─────────────────────────────────────────────────────────────────
-// Nicole's screen 
-//
-// Fields to collect (from the Figma):
-//   - Name
-//   - Year (Freshman / Sophomore / Junior / Senior)
-//   - Major
-//   - Bio
-//   - Avatar selection (Owl, Bunny, Cat, Dog — horizontal scroll)
-//     Locked avatars: Fox (100pts), Gator (50pts)
-//
-// When the user finishes and taps Continue:
-//   router.replace('/onboarding/interests');
-//
-// Shared imports already set up:
-//   COLORS  → all app colors (@/constants/colors)
-//   FONTS   → FONTS.heading (Agbalumo), FONTS.body (Itim)
-//   useAppFonts() → call at top of component, return null until ready
-//
-// Background gradient to stay consistent with onboarding:
-//   colors={[COLORS.periwinkleMist, COLORS.ghostBlue, COLORS.lilacHaze]}
-// ─────────────────────────────────────────────────────────────────
+// Updated Map with your new assets
+const AVATAR_MAP = {
+  cat: require('../../assets/images/avatar_cat.png'),
+  dog: require('../../assets/images/avatar_dog.png'),
+  owl: require('../../assets/images/avatar_owl.png'),
+  fox: require('../../assets/images/avatar_fox.png'),
+  bunny: require('../../assets/images/avatar_bunny.png'),
+  gator: require('../../assets/images/avatar_gator.png'),
+};
+
+
+type AvatarKey = keyof typeof AVATAR_MAP;
+
 
 export default function CreateProfileScreen() {
+  const [name, setName] = useState<string>('');
+  const [year, setYear] = useState<string>('');
+  const [major, setMajor] = useState<string>('');
+  const [bio, setBio] = useState<string>('');
+ 
+  const [selectedAvatar, setSelectedAvatar] = useState<AvatarKey>('cat');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
+
+
   const fontsLoaded = useAppFonts();
 
-  // Sample state — Nicole can expand these
-  const [name, setName] = useState('');
-  const [year, setYear] = useState('');
-  const [major, setMajor] = useState('');
-  const [bio, setBio] = useState('');
+
+  const handleAllDone = async () => {
+    if (!name.trim() || !year.trim() || !major.trim() || !bio.trim()) {
+      setError(true);
+      return;
+    }
+    setError(false);
+    setLoading(true);
+    try {
+      await new Promise(res => setTimeout(res, 1000));
+      router.push('/onboarding/interests');
+    } catch (e) {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   if (!fontsLoaded) return null;
 
+
   return (
     <LinearGradient
-      colors={[COLORS.periwinkleMist, COLORS.ghostBlue, COLORS.lilacHaze]}
+      colors={['#A3B8EE', '#C5D4F5', '#F4A07E']}
+      locations={[0, 0.5, 1]}
       style={styles.gradient}
     >
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
       >
-        <Text style={styles.title}>Create Your Profile</Text>
-        <Text style={styles.subtitle}>Tell us a little about yourself 🦊</Text>
-
-        {/* ── Sample fields — Nicole replaces/expands these ── */}
-
-        <Text style={styles.label}>Name</Text>
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            placeholder="Your name"
-            placeholderTextColor={COLORS.blueTonedSlate}
-            value={name}
-            onChangeText={setName}
-          />
-        </View>
-
-        <Text style={styles.label}>Year</Text>
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g. Freshman"
-            placeholderTextColor={COLORS.blueTonedSlate}
-            value={year}
-            onChangeText={setYear}
-          />
-        </View>
-
-        <Text style={styles.label}>Major</Text>
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            placeholder="Your major"
-            placeholderTextColor={COLORS.blueTonedSlate}
-            value={major}
-            onChangeText={setMajor}
-          />
-        </View>
-
-        <Text style={styles.label}>Bio</Text>
-        <View style={[styles.inputWrapper, styles.bioWrapper]}>
-          <TextInput
-            style={[styles.input, styles.bioInput]}
-            placeholder="Tell us about yourself..."
-            placeholderTextColor={COLORS.blueTonedSlate}
-            value={bio}
-            onChangeText={setBio}
-            multiline
-          />
-        </View>
-
-        {/* TODO: Nicole adds avatar picker here */}
-        <View style={styles.avatarPlaceholder}>
-          <Text style={styles.avatarPlaceholderText}>🐾 Avatar picker goes here</Text>
-        </View>
-
-        {/* Continue → goes to interests screen */}
-        <TouchableOpacity
-          style={styles.continueButton}
-          onPress={() => router.replace('/onboarding/interests')}
-          activeOpacity={0.85}
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
         >
-          <LinearGradient
-            colors={[COLORS.mutedSapphire, COLORS.softCobalt]}
-            style={styles.continueGradient}
-          >
-            <Text style={styles.continueText}>Continue →</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+          <View style={styles.card}>
+            <Text style={styles.title}>Create Your Profile</Text>
 
-      </ScrollView>
+
+            {/* Large Preview Circle */}
+            <View style={styles.avatarDisplayContainer}>
+              <View style={styles.avatarCircleFrame}>
+                <Image
+                  source={AVATAR_MAP[selectedAvatar]}
+                  style={styles.largeAvatar}
+                />
+              </View>
+            </View>
+
+
+            {/* Inputs */}
+            <View style={styles.row}>
+              <View style={[styles.fieldColumn, { flex: 2.5, marginRight: 12 }]}>
+                <Text style={styles.label}>Name</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Name"
+                  placeholderTextColor={COLORS.blueTonedSlate}
+                  value={name}
+                  onChangeText={(val) => { setName(val); setError(false); }}
+                />
+              </View>
+              <View style={[styles.fieldColumn, { flex: 1 }]}>
+                <Text style={styles.label}>Year</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Year"
+                  placeholderTextColor={COLORS.blueTonedSlate}
+                  keyboardType="numeric"
+                  value={year}
+                  onChangeText={(val) => { setYear(val); setError(false); }}
+                />
+              </View>
+            </View>
+
+
+            <Text style={styles.label}>Major</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. Computer Engineering"
+              placeholderTextColor={COLORS.blueTonedSlate}
+              value={major}
+              onChangeText={(val) => { setMajor(val); setError(false); }}
+            />
+
+
+            <Text style={styles.label}>Bio</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Tell us about yourself!"
+              placeholderTextColor={COLORS.blueTonedSlate}
+              multiline
+              value={bio}
+              onChangeText={(val) => { setBio(val); setError(false); }}
+            />
+
+
+            {/* Horizontal Avatar Selector */}
+            <Text style={styles.pickerTitle}>Choose your avatar!</Text>
+            <View style={styles.scrollWrapper}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.pickerScrollContent}
+              >
+                {(Object.keys(AVATAR_MAP) as AvatarKey[]).map((key) => (
+                  <TouchableOpacity
+                    key={key}
+                    onPress={() => { setSelectedAvatar(key); setError(false); }}
+                    activeOpacity={0.7}
+                    style={[
+                      styles.avatarBox,
+                      selectedAvatar === key && styles.selectedBox
+                    ]}
+                  >
+                    <Image source={AVATAR_MAP[key]} style={styles.optionImage} />
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleAllDone}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>All Done!</Text>
+              )}
+            </TouchableOpacity>
+
+
+            {error && (
+              <Text style={styles.errorText}>Please fill out the correct fields</Text>
+            )}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 }
 
+
 const styles = StyleSheet.create({
   gradient: { flex: 1 },
+  keyboardView: { flex: 1 },
   scroll: {
     flexGrow: 1,
-    paddingHorizontal: 28,
-    paddingTop: 70,
-    paddingBottom: 50,
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 30,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
   },
   title: {
     fontFamily: FONTS.heading,
-    fontSize: 30,
+    fontSize: 26,
     color: COLORS.deepNavy,
-    marginBottom: 6,
     textAlign: 'center',
+    marginBottom: 20,
   },
-  subtitle: {
-    fontFamily: FONTS.body,
-    fontSize: 16,
-    color: COLORS.blueTonedSlate,
-    marginBottom: 28,
-    textAlign: 'center',
+  avatarDisplayContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
+  avatarCircleFrame: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#C5D4F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  largeAvatar: {
+    width: 75,
+    height: 75,
+    resizeMode: 'contain',
+  },
+  row: { flexDirection: 'row' },
+  fieldColumn: { marginBottom: 12 },
   label: {
     fontFamily: FONTS.body,
-    fontSize: 15,
+    fontSize: 13,
     color: COLORS.softCobalt,
-    alignSelf: 'flex-start',
     marginBottom: 4,
-    marginLeft: 2,
+    marginLeft: 4,
   },
-  inputWrapper: {
-    width: '100%',
-    backgroundColor: 'rgba(255,255,255,0.75)',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 16,
+  input: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 15,
+    fontFamily: FONTS.body,
+    color: COLORS.deepNavy,
+    borderWidth: 1,
+    borderColor: 'rgba(197, 212, 245, 0.4)',
+  },
+  textArea: {
+    height: 60,
+    textAlignVertical: 'top',
+    marginBottom: 10,
+  },
+  pickerTitle: {
+    fontFamily: FONTS.body,
+    fontSize: 14,
+    color: '#1565C0',
+    textAlign: 'center',
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  scrollWrapper: {
+    marginBottom: 25,
+    height: 85,
+  },
+  pickerScrollContent: {
+    paddingHorizontal: 5,
+    alignItems: 'center',
+    gap: 12, // Space between avatars
+  },
+  avatarBox: {
+    width: 70,
+    height: 70,
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(197, 212, 245, 0.6)',
   },
-  input: {
-    fontFamily: FONTS.body,
-    fontSize: 15,
-    color: COLORS.deepNavy,
+  selectedBox: {
+    borderWidth: 3,
+    borderColor: COLORS.deepNavy,
+    backgroundColor: '#F0F4FF',
   },
-  bioWrapper: {
-    minHeight: 100,
+  optionImage: {
+    width: 55,
+    height: 55,
+    resizeMode: 'contain',
   },
-  bioInput: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  avatarPlaceholder: {
-    width: '100%',
-    height: 80,
-    backgroundColor: 'rgba(255,255,255,0.4)',
-    borderRadius: 16,
+  button: {
+    backgroundColor: '#5C6BC0',
+    borderRadius: 15,
+    paddingVertical: 15,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 28,
-    borderWidth: 1.5,
-    borderColor: 'rgba(197,212,245,0.5)',
-    borderStyle: 'dashed',
+    shadowColor: '#5C6BC0',
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 3,
   },
-  avatarPlaceholderText: {
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
     fontFamily: FONTS.body,
-    fontSize: 15,
-    color: COLORS.blueTonedSlate,
+    fontWeight: '700',
   },
-  continueButton: {
-    width: SCREEN_WIDTH - 56,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  continueGradient: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  continueText: {
-    fontFamily: FONTS.body,
-    fontSize: 17,
-    color: COLORS.ghostBlue,
-    letterSpacing: 0.5,
+  errorText: {
+    color: '#D32F2F',
+    fontWeight: '700',
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 15,
   },
 });
