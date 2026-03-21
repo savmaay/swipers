@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '@/constants/urls';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -11,7 +13,7 @@ import {
   PanResponder,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
@@ -179,6 +181,7 @@ function InterestChip({
 
 // Screen 
 export default function InterestsScreen() {
+  const params = useLocalSearchParams();
   const fontsLoaded  = useAppFonts();
   const [selected, setSelected] = useState<string[]>([]);
   const fadeAnim     = useRef(new Animated.Value(0)).current;
@@ -197,10 +200,53 @@ export default function InterestsScreen() {
     Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }).start();
   }, []);
 
-  const navigate = () => {
+
+  const navigate = async () => {
     if (!canContinueRef.current || hasNavigated.current) return;
     hasNavigated.current = true;
-    router.replace('/(tabs)');
+
+    try {
+    const token = (params.token as string) || (await AsyncStorage.getItem('userToken'));
+
+    if (!token) {
+      alert("Session expired. Please log in again.");
+      router.replace('/login');
+      return;
+    }
+      const allInterests = INTEREST_ROWS.flat();
+      const selectedLabels = selected.map(id => 
+        allInterests.find(item => item.id === id)?.label
+      );
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/update-profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token, 
+        },
+        body: JSON.stringify({
+          name: params.name,
+          year: params.year,
+          major: params.major,
+          bio: params.bio,
+          avatar: params.avatar,
+          interests: selectedLabels,
+          onboardingComplete: true,
+        }),
+      });
+
+      if (response.ok) {
+        router.replace('/(tabs)');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.msg || "Something went wrong saving your profile.");
+        hasNavigated.current = false;
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      alert("Could not connect to the server.");
+      hasNavigated.current = false;
+    }
   };
 
   const panResponder = useRef(
