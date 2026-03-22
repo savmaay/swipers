@@ -1,4 +1,6 @@
 import React, { useState, useRef } from 'react';
+import { API_BASE_URL } from '@/constants/urls';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -48,19 +50,31 @@ function ForgotPasswordModal({
     }
   }, [visible]);
 
-  const handleSend = () => {
+const handleSend = async () => {
     if (!resetEmail) return;
     setSending(true);
-    // TODO: replace with real API call
-    // await fetch('https://swipers.onrender.com/api/auth/forgot-password', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ email: resetEmail }),
-    // });
-    setTimeout(() => {
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/forgotpassword`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSending(false);
+        setSent(true);
+      } else {
+        setSending(false);
+        alert(data.msg || "Something went wrong. Is the email correct?");
+      }
+    } catch (e) {
+      console.error("Connection Error:", e);
       setSending(false);
-      setSent(true);
-    }, 1000);
+      alert("Network error. Please try again later.");
+    }
   };
 
   return (
@@ -170,7 +184,7 @@ export default function LoginScreen() {
 
   const fontsLoaded = useAppFonts();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       setError(true);
       return;
@@ -178,20 +192,29 @@ export default function LoginScreen() {
     setLoading(true);
     setError(false);
 
-    // TODO: replace with real API call when backend is ready
-    // const response = await fetch('https://swipers.onrender.com/api/auth/login', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ email, password }),
-    // });
-    // if (!response.ok) { setError(true); setLoading(false); return; }
-    // router.replace('/(tabs)');
+    try {
+      const response = await fetch('http://192.168.5.137:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    // ← Temporarily accepts any credentials for development
-    setTimeout(() => {
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Login successful, token received");
+        await AsyncStorage.setItem('userToken', data.token);
+        setLoading(false);
+        router.replace('/(tabs)');
+      } else {
+        setError(true);
+        setLoading(false);
+      }
+    } catch (e) {
+      console.error("Connection Error:", e);
+      alert("Cannot connect to server. Check your Wi-Fi!");
       setLoading(false);
-      router.replace('/(tabs)');
-    }, 800);
+    }
   };
 
   if (!fontsLoaded) return null;

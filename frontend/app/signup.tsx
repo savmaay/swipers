@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { TextInput as RNTextInput } from 'react-native';
+import { API_BASE_URL } from '@/constants/urls';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -50,18 +52,41 @@ export default function SignupScreen() {
     setErrorState('none');
 
     try {
-      // API call simulation
-      await new Promise((res) => setTimeout(res, 1500));
-      
-      if (isAdmin) {
-        setErrorState('admin'); 
-      } else if (email === 'exists@test.com') {
-        setErrorState('exists'); 
-      } else {
-        router.replace('/onboarding');
+      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: fullName,
+          email: email.toLowerCase(), 
+          password: password,
+          role: isAdmin ? 'admin' : 'member', 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+  await AsyncStorage.setItem('userToken', data.token); 
+  
+  router.replace({
+    pathname: '/onboarding', 
+    params: { 
+      token: data.token,
+      name: fullName 
+    }
+  });
+} else {
+        if (data.msg === "User already exists") {
+          setErrorState('exists');
+        } else {
+          alert(data.msg || "An error occurred during registration");
+        }
       }
     } catch (e) {
-      setErrorState('exists');
+      console.error("Connection Error:", e);
+      alert("Cannot connect to server. Check your Wi-Fi and make sure the backend is running!");
     } finally {
       setLoading(false);
     }

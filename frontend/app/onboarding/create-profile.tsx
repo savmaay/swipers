@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -13,7 +14,7 @@ import {
   Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
@@ -103,6 +104,8 @@ function YearDropdown({
 
 // ─── Screen ───────────────────────────────────────────────────────
 export default function CreateProfileScreen() {
+  const params = useLocalSearchParams();
+  const token = params.token;
   const [name, setName]                   = useState<string>('');
   const [year, setYear]                   = useState<string>('1st');
   const [major, setMajor]                 = useState<string>('');
@@ -113,16 +116,26 @@ export default function CreateProfileScreen() {
 
   const fontsLoaded = useAppFonts();
 
-  const handleAllDone = async () => {
+const handleAllDone = async () => {
     if (!name.trim() || !year.trim() || !major.trim()) {
       setError(true);
       return;
     }
     setError(false);
     setLoading(true);
+
     try {
-      await new Promise(res => setTimeout(res, 1000));
-      router.push('/onboarding/interests');
+      router.push({
+        pathname: '/onboarding/interests',
+        params: { 
+          name, 
+          year, 
+          major, 
+          bio, 
+          avatar: selectedAvatar,
+          token: token
+        }
+      });
     } catch (e) {
       setError(true);
     } finally {
