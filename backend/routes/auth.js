@@ -66,7 +66,7 @@ router.post('/forgotpassword', async (req, res) => {
 
     const resetUrl = `https://swipers-wo1u.onrender.com/api/auth/resetpassword/${resetToken}`;
     await resend.emails.send({
-  from: 'onboarding@resend.dev',
+  from: 'Swipers <nancyvutuan@gmail.com>',
   to: user.email,
   subject: 'Password Reset Request',
   html: `
