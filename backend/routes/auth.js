@@ -2,23 +2,12 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto'); 
 const auth = require('../middleware/auth');
 const User = require('../models/User.js');
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false 
-  }
-});
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 router.post('/register', async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -76,23 +65,20 @@ router.post('/forgotpassword', async (req, res) => {
     await user.save();
 
     const resetUrl = `https://swipers-wo1u.onrender.com/api/auth/resetpassword/${resetToken}`;
-
-    const mailOptions = {
-      from: `"Swipers Support" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: 'Password Reset Request',
-      html: `
-        <h3>You requested a password reset</h3>
-        <p>Please click the link below to choose a new password. This link is valid for 1 hour.</p>
-        <a href="${resetUrl}" style="background-color: #4A90E2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset My Password</a>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
+    await resend.emails.send({
+  from: 'Swipers <nancyvutuan@gmail.com>',
+  to: user.email,
+  subject: 'Password Reset Request',
+  html: `
+    <h3>You requested a password reset</h3>
+    <p>Please click the link below to choose a new password. This link is valid for 1 hour.</p>
+    <a href="${resetUrl}">Reset My Password</a>
+  `,
+});
     res.json({ msg: "Reset link sent to your email!" });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Server Error');
+  console.error("EMAIL ERROR:", err);
+  res.status(500).json({ msg: err.message });
   }
 });
 

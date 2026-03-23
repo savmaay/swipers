@@ -17,12 +17,16 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.3.1",
+<<<<<<< HEAD
     "nodemailer": "^8.0.3"
   },
   "devDependencies": {
     "jest": "^29.0.0",
     "supertest": "^6.0.0",
     "mongodb-memory-server": "^9.0.0"
+=======
+    "resend": "^6.9.4"
+>>>>>>> f321519b984c19efdbcf64466fc0f09943ed2b40
   }
 }
 
