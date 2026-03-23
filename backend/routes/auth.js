@@ -70,7 +70,7 @@ router.post('/forgotpassword', async (req, res) => {
     user.resetPasswordExpire = Date.now() + 3600000; 
     await user.save();
 
-    const resetUrl = `http://192.168.5.137:3000/api/auth/resetpassword/${resetToken}`;
+    const resetUrl = `https://swipers-wo1u.onrender.com/api/auth/resetpassword/${resetToken}`;
 
     const mailOptions = {
       from: `"Swipers Support" <${process.env.EMAIL_USER}>`,
