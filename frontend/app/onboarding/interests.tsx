@@ -18,13 +18,12 @@ import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MIN_SELECTIONS = 3;
 const SWIPE_UP_THRESHOLD = -80;
 const SPEECH_TEXT = 'Pick at least 3 interests\nso we can find the best\nevents for you!';
 
-
-const FOX_SIZE     = 125;
+const FOX_SIZE     = SCREEN_HEIGHT * 0.14;  // relative so it scales on any phone
 const FOX_X_OFFSET = 0;
 const FOX_Y_OFFSET = 0;
 
@@ -334,7 +333,7 @@ export default function InterestsScreen() {
               ))}
             </View>
           ))}
-          <View style={{ height: 100 }} />
+          <View style={{ height: 120 }} />
         </ScrollView>
 
       </Animated.View>
@@ -379,15 +378,15 @@ const styles = StyleSheet.create({
   wrapper: { flex: 1 },
 
   header: {
-    paddingTop: 60,
+    paddingTop: SCREEN_HEIGHT * 0.07,  // relative so it fits any phone
     paddingHorizontal: 16,
-    paddingBottom: 10,
+    paddingBottom: 8,
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   title: {
     fontFamily: FONTS.heading,
-    fontSize: 30,
+    fontSize: SCREEN_HEIGHT * 0.033,   // relative font size
     color: COLORS.deepNavy,
     textAlign: 'center',
   },
@@ -400,13 +399,14 @@ const styles = StyleSheet.create({
   counterGood: { color: '#4CAF50', fontSize: 16 },
 
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,             // less horizontal padding so chips don't overflow
     paddingTop: 8,
+    paddingBottom: 20,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 10,
+    gap: 8,                            // slightly tighter gap
     marginBottom: 6,
   },
 
@@ -415,11 +415,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.65)',
     borderRadius: 24,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 12,             // less horizontal padding so text fits on small screens
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.85)',
-    gap: 6,
+    gap: 5,
     shadowColor: COLORS.deepNavy,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -432,10 +432,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     elevation: 5,
   },
-  chipEmoji: { fontSize: 16 },
+  chipEmoji: { fontSize: 14 },         // slightly smaller emoji
   chipLabel: {
     fontFamily: FONTS.body,
-    fontSize: 14,
+    fontSize: 13,                      // slightly smaller label
     color: COLORS.deepNavy,
   },
   chipLabelSelected: { color: COLORS.ghostBlue },
@@ -452,8 +452,8 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 2.5,
     borderColor: COLORS.deepNavy,
-    paddingVertical: 14,
-    paddingHorizontal: 22,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -461,14 +461,14 @@ const styles = StyleSheet.create({
   },
   speechText: {
     fontFamily: FONTS.heading,
-    fontSize: 18,
+    fontSize: SCREEN_HEIGHT * 0.018,   // relative so it fits on small screens
     color: COLORS.softCobalt,
     textAlign: 'center',
-    lineHeight: 26,
+    lineHeight: SCREEN_HEIGHT * 0.026,
   },
   cursor: {
     fontFamily: FONTS.heading,
-    fontSize: 18,
+    fontSize: SCREEN_HEIGHT * 0.018,
     color: COLORS.softCobalt,
   },
   dotsRow: {
@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: 40,
+    paddingBottom: SCREEN_HEIGHT * 0.05,  // relative bottom padding
     paddingHorizontal: 24,
     paddingTop: 12,
   },
@@ -522,13 +522,13 @@ const styles = StyleSheet.create({
   },
   continueText: {
     fontFamily: FONTS.heading,
-    fontSize: 20,
+    fontSize: SCREEN_HEIGHT * 0.022,   // relative font size
     color: '#fff',
     letterSpacing: 0.5,
   },
   upArrow: {
     fontFamily: FONTS.heading,
-    fontSize: 34,
+    fontSize: SCREEN_HEIGHT * 0.036,   // relative arrow size
     color: '#fff',
   },
 });
