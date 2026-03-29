@@ -19,28 +19,28 @@ import { useAppFonts } from '@/hooks/useAppFonts';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Fox
-const FOX_SIZE = 170;       // width & height of fox image
-const FOX_X    = 10;        // distance from LEFT edge of screen
-const FOX_Y    = 120;        // distance from TOP of screen (increase = lower)
+const FOX_SIZE = SCREEN_HEIGHT * 0.18;       // width & height of fox image
+const FOX_X    = SCREEN_WIDTH * 0.03;        // distance from LEFT edge of screen
+const FOX_Y    = SCREEN_HEIGHT * 0.13;       // distance from TOP of screen (increase = lower)
 
 // Speech Bubble
-const BUBBLE_X         = 150;   // distance from LEFT edge of screen
-const BUBBLE_Y         = 50;    // distance from TOP of screen (increase = lower)
-const BUBBLE_WIDTH     = 200;   // width of speech bubble
-const BUBBLE_HEIGHT    = 100;   // height of speech bubble (it's circular/oval)
-const BUBBLE_FONT_SIZE = 25;    // font size inside bubble
+const BUBBLE_X         = SCREEN_WIDTH * 0.38;   // distance from LEFT edge of screen
+const BUBBLE_Y         = SCREEN_HEIGHT * 0.05;  // distance from TOP of screen (increase = lower)
+const BUBBLE_WIDTH     = SCREEN_WIDTH * 0.52;   // width of speech bubble
+const BUBBLE_HEIGHT    = SCREEN_HEIGHT * 0.12;  // height of speech bubble (it's circular/oval)
+const BUBBLE_FONT_SIZE = SCREEN_HEIGHT * 0.026; // font size inside bubble
 
 // Description box
-const DESC_WIDTH      = '92%';  // width of description box
-const DESC_HEIGHT     = 475;    // controls height in pixels
-const DESC_FONT_SIZE  = 31;     // font size inside description box
-const DESC_PADDING_V  = 24;     // vertical padding inside description box
-const DESC_PADDING_H  = 20;     // horizontal padding inside description box
-const DESC_TOP        = 270;    // distance from TOP of screen (increase = lower)
+const DESC_WIDTH      = '92%';                  // width of description box
+const DESC_HEIGHT     = SCREEN_HEIGHT * 0.44;   // controls height in pixels
+const DESC_FONT_SIZE  = SCREEN_HEIGHT * 0.028;  // font size inside description box
+const DESC_PADDING_V  = SCREEN_HEIGHT * 0.025;  // vertical padding inside description box
+const DESC_PADDING_H  = SCREEN_WIDTH * 0.05;    // horizontal padding inside description box
+const DESC_TOP        = SCREEN_HEIGHT * 0.32;   // distance from TOP of screen (increase = lower)
 
 // CTA bottom text
-const CTA_FONT_SIZE = 25;       // "Swipe Right to Learn More" size
-const ARROW_SIZE    = 40;       // arrow size
+const CTA_FONT_SIZE = SCREEN_HEIGHT * 0.026;    // "Swipe Right to Learn More" size
+const ARROW_SIZE    = SCREEN_HEIGHT * 0.042;    // arrow size
 
 const FULL_TEXT = 'Hello there!\nWelcome to\nSwiper!';
 
