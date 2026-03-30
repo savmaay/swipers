@@ -13,18 +13,20 @@ export default function TabLayout() {
   // 0: arrow (swipe), 1: group chat, 2: calendar, 3: star
   if (lastSegment === 'swipe') activeTab = 0;
   else if (lastSegment === 'explore') activeTab = 1;
+    else if (lastSegment === 'rating') activeTab = 3;
 
   return (
     <View style={{ flex: 1 }}>
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarStyle: { display: 'none' }, // hide default Expo tab bar
+          tabBarStyle: { display: 'none' }, 
         }}
       >
         <Tabs.Screen name="index" />
         <Tabs.Screen name="swipe" />
         <Tabs.Screen name="explore" />
+          <Tabs.Screen name="rating" />
       </Tabs>
 
       <CustomTabBar activeTab={activeTab} router={router} segments={segments} />
@@ -43,7 +45,16 @@ function CustomTabBar({ activeTab = 0, router, segments }: { activeTab?: number;
     },
     { icon: 'chatbubbles-outline', onPress: () => router.push('/(tabs)/explore') },
     { icon: 'calendar-outline', onPress: () => {/* no-op, just icon for now */} },
-    { icon: 'star-outline', onPress: () => {/* no-op, just icon for now */} },
+      {
+      icon: 'star-outline',
+      onPress: () => {
+        if (segments[segments.length - 1] === 'rating') {
+          router.push('/(tabs)'); // go back to dashboard
+        } else {
+          router.push('/(tabs)/rating'); // go to rating
+        }
+      }
+    },
   ];
 
   return (
@@ -54,7 +65,7 @@ function CustomTabBar({ activeTab = 0, router, segments }: { activeTab?: number;
           style={styles.tabItem}
           activeOpacity={0.7}
           onPress={tab.onPress}
-          disabled={index > 1} 
+          disabled={index == 2} 
         >
           <View style={[styles.tabIconWrapper, activeTab === index ? styles.tabIconActive : null]}>
             <Ionicons
