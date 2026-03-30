@@ -22,7 +22,7 @@ export default function CustomTabBar() {
     }
   };
   const handleGroupChat = () => router.replace('/(tabs)/explore');
-  // Calendar and Star are just icons for now, no navigation
+  const handleStar = () => router.push('/(tabs)/rating');
 
   return (
     <View style={styles.tabBar}>
@@ -38,10 +38,10 @@ export default function CustomTabBar() {
       <View style={styles.tabButton} pointerEvents="none">
         <MaterialIcons name="calendar-today" size={32} color={COLORS.dustyTangerine} />
       </View>
-      {/* Star (icon only, disabled) */}
-      <View style={styles.tabButton} pointerEvents="none">
-        <FontAwesome name="star" size={32} color={COLORS.dustyTangerine} />
-      </View>
+      {/* Star (enabled) */}
+      <TouchableOpacity style={styles.tabButton} onPress={handleStar}>
+        <FontAwesome name="star" size={32} color={pathname === '/(tabs)/rating' ? COLORS.deepNavy : COLORS.dustyTangerine} />
+      </TouchableOpacity>
     </View>
   );
 }
