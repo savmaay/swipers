@@ -21,7 +21,7 @@ export default function CustomTabBar() {
       setOnSwipe(true);
     }
   };
-  const handleGroupChat = () => router.replace('/(tabs)/explore');
+  const handleGroupChat = () => router.replace('/(tabs)/groupchat');
   const handleCalendar = () => router.replace('/(tabs)/calendar');
   const handleStar = () => router.push('/(tabs)/rating');
 
@@ -35,7 +35,7 @@ export default function CustomTabBar() {
       <TouchableOpacity style={styles.tabButton} onPress={handleGroupChat}>
         <Ionicons name="chatbubbles" size={32} color={pathname === '/(tabs)/explore' ? COLORS.deepNavy : COLORS.dustyTangerine} />
       </TouchableOpacity>
-      {/* Calendar (icon only, disabled) */}
+      {/* Calendar */}
       <TouchableOpacity style={styles.tabButton} onPress={handleCalendar}>
         <Ionicons name="chatbubbles" size={32} color={pathname === '/(tabs)/explore' ? COLORS.deepNavy : COLORS.dustyTangerine} />
       </TouchableOpacity>
