@@ -14,7 +14,7 @@ export default function TabLayout() {
   // Logic Change: Only highlight if strictly on the sub-pages
   if (lastSegment === 'swipe') {
     activeTab = 0;
-  } else if (lastSegment === 'explore') {
+  } else if (lastSegment === 'groupchat') {
     activeTab = 1;
   } else if (lastSegment === 'calendar') {
     activeTab = 2;
@@ -67,8 +67,14 @@ function CustomTabBar({
     },
     {
       icon: activeTab === 1 ? 'chatbubbles' : 'chatbubbles-outline',
-      onPress: () => router.push('/(tabs)/explore'),
+      onPress: () => {
+      if (lastSegment === 'groupchat') {
+        router.push('/(tabs)'); 
+      } else {
+        router.push('/(tabs)/groupchat');
+      }
     },
+  },
     {
     icon: activeTab === 2 ? 'calendar' : 'calendar-outline',
     onPress: () => {
