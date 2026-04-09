@@ -18,10 +18,10 @@ import { useAppFonts } from '@/hooks/useAppFonts';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Fox
-const FOX_SIZE = SCREEN_HEIGHT * 0.18;       // width & height of fox image
+// Swiper
+const FOX_SIZE = SCREEN_HEIGHT * 0.18;       // width & height of swiper image
 const FOX_X    = SCREEN_WIDTH * 0.03;        // distance from LEFT edge of screen
-const FOX_Y    = SCREEN_HEIGHT * 0.17;       // distance from TOP of screen (increase = lower)
+const FOX_Y    = SCREEN_HEIGHT * 0.19;       // distance from TOP of screen (increase = lower)
 
 // Speech Bubble
 const BUBBLE_X         = SCREEN_WIDTH * 0.38;   // distance from LEFT edge of screen
@@ -36,7 +36,7 @@ const DESC_HEIGHT     = SCREEN_HEIGHT * 0.49;   // controls height in pixels
 const DESC_FONT_SIZE  = SCREEN_HEIGHT * 0.032;  // font size inside description box
 const DESC_PADDING_V  = SCREEN_HEIGHT * 0.025;  // vertical padding inside description box
 const DESC_PADDING_H  = SCREEN_WIDTH * 0.05;    // horizontal padding inside description box
-const DESC_TOP        = SCREEN_HEIGHT * 0.36;   // distance from TOP of screen (increase = lower)
+const DESC_TOP        = SCREEN_HEIGHT * 0.37;   // distance from TOP of screen (increase = lower)
 
 // CTA bottom text
 const CTA_FONT_SIZE = SCREEN_HEIGHT * 0.026;    // "Swipe Right to Learn More" size
@@ -62,7 +62,7 @@ function AnimatedArrow() {
 }
 
 // Screen
-export default function IntroScreen() {
+export default function AdminIntroScreen() {
   const fontsLoaded = useAppFonts();
   const fadeAnim  = useRef(new Animated.Value(0)).current;
   const foxBounce = useRef(new Animated.Value(0)).current;
@@ -99,7 +99,7 @@ export default function IntroScreen() {
     return () => clearTimeout(startDelay);
   }, []);
 
-  // Swipe right anywhere on screen to go to card-demo
+  // Swipe right anywhere on screen to go to add-demo
   // dragX follows the finger so user can see the swipe happening
   const panResponder = useRef(
     PanResponder.create({
@@ -119,7 +119,7 @@ export default function IntroScreen() {
             toValue: SCREEN_WIDTH,
             duration: 250,
             useNativeDriver: true,
-          }).start(() => router.replace('/onboarding/card-demo'));
+          }).start(() => router.replace('/admin-onboarding/dashboard-add'));
         } else {
           // Snap back if not swiped far enough
           Animated.spring(dragX, { toValue: 0, useNativeDriver: true }).start();
@@ -139,7 +139,7 @@ export default function IntroScreen() {
       {/* Content slides with finger */}
       <Animated.View style={[styles.absoluteLayer, { opacity: fadeAnim, transform: [{ translateX: dragX }] }]}>
 
-        {/* ── Fox — absolutely positioned ── */}
+        {/* ── Swiper — absolutely positioned ── */}
         <Animated.View
           style={[
             styles.foxContainer,
@@ -179,7 +179,7 @@ export default function IntroScreen() {
           <View style={styles.tailDot3} />
         </View>
 
-        {/* ── Description Card — absolutely positioned ── */}
+        {/* ── Description Card — admin version ── */}
         <View
           style={[
             styles.descCard,
@@ -195,10 +195,10 @@ export default function IntroScreen() {
           ]}
         >
           <Text style={[styles.descText, { fontSize: DESC_FONT_SIZE }]}>
-            Swiper is your personal campus event companion! Tell us your
-            interests, swipe yes or no on events, and we'll build your schedule
-            automatically. Connect with other students going to the same events,
-            earn badges, and never miss what matters at UF, all in one place.
+            Swiper is your campus event management tool! Post events for your
+            organization, reach students who match your event's interests, and
+            track who's attending. Manage everything in one place and never miss
+            a chance to grow your community at UF.
           </Text>
         </View>
 
@@ -208,7 +208,7 @@ export default function IntroScreen() {
       <Animated.View style={[styles.ctaWrapper, { opacity: ctaFade }]}>
         <TouchableOpacity
           style={styles.ctaRow}
-          onPress={() => router.replace('/onboarding/card-demo')}
+          onPress={() => router.replace('/admin-onboarding/dashboard-demo')}
           activeOpacity={0.8}
         >
           <Text style={[styles.ctaText, { fontSize: CTA_FONT_SIZE }]}>
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
 
-  // Fox
+  // Swiper
   foxContainer: {
     position: 'absolute',
   },
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     color: COLORS.softCobalt,
   },
 
-  // Circular bubble tail dots (like a comic speech bubble)
+  // Circular bubble tail dots 
   tailDot1: {
     position: 'absolute',
     bottom: -14,
