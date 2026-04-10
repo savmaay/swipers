@@ -27,15 +27,14 @@ type CalEvent = {
 
 const MOCK_EVENTS: CalEvent[] = [
   // CONFLICT
-  { id: 'e1', date: '2026-04-07', time: '3:00 pm', timeHour: 15, title: 'SWE Picnic Social', club: 'SWE', description: 'Food and games at the Plaza.', tags: ['Social'], color: COLORS.mutedSapphire },
-  { id: 'e2', date: '2026-04-07', time: '3:00 pm', timeHour: 15, title: 'GatorAI Study', club: 'GatorAI', description: 'Neural network review.', tags: ['AI'], color: COLORS.softCobalt },
+  { id: 'e1', date: '2026-04-10', time: '3:00 pm', timeHour: 15, title: 'SWE Picnic Social', club: 'SWE', description: 'Food and games at the Plaza.', tags: ['Social'], color: COLORS.mutedSapphire },
+  { id: 'e2', date: '2026-04-10', time: '3:00 pm', timeHour: 15, title: 'GatorAI Study', club: 'GatorAI', description: 'Neural network review.', tags: ['AI'], color: COLORS.softCobalt },
   
   // NO CONFLICT
-  { id: 'e3', date: '2026-04-07', time: '4:00 pm', timeHour: 16, title: 'AI Club Party', club: 'AI Club', description: 'End of semester celebration!', tags: ['Social'], color: COLORS.dustyTangerine },
-  { id: 'e4', date: '2026-04-07', time: '4:30 pm', timeHour: 16, title: 'Quick Sync', club: 'Dev Team', description: 'Brief status update.', tags: ['Work'], color: COLORS.warmMelon },
-  
-  { id: 'e5', date: '2026-04-07', time: '1:00 pm', timeHour: 13, title: 'Team Standup', club: 'Dev Team', description: 'Weekly sync.', tags: ['Work'], color: COLORS.mutedSapphire },
-  { id: 'e6', date: '2026-04-08', time: '9:00 am', timeHour: 9, title: 'Advising', club: 'UF', description: 'Course planning.', tags: ['Academic'], color: COLORS.softCobalt },
+  { id: 'e3', date: '2026-04-10', time: '4:00 pm', timeHour: 16, title: 'AI Club Party', club: 'AI Club', description: 'End of semester celebration!', tags: ['Social'], color: COLORS.dustyTangerine },
+  { id: 'e4', date: '2026-04-10', time: '4:30 pm', timeHour: 16, title: 'Quick Sync', club: 'Dev Team', description: 'Brief status update.', tags: ['Work'], color: COLORS.warmMelon },
+  { id: 'e5', date: '2026-04-10', time: '1:00 pm', timeHour: 13, title: 'Team Standup', club: 'Dev Team', description: 'Weekly sync.', tags: ['Work'], color: COLORS.mutedSapphire },
+  { id: 'e6', date: '2026-04-10', time: '9:00 am', timeHour: 9, title: 'Advising', club: 'UF', description: 'Course planning.', tags: ['Academic'], color: COLORS.softCobalt },
 ];
 
 const TODAY = new Date();
