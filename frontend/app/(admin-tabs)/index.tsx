@@ -97,7 +97,7 @@ function Cloud({
 // Admin Tab Bar
 function AdminTabBar({ activeTab = -1 }: { activeTab?: number }) {
   const tabs = [
-    { icon: 'pencil-outline',     route: '/(admin-tabs)/my-events'   },
+    { icon: 'pencil-outline',     route: '/(admin-tabs)/current-events'   },
     { icon: 'add-circle-outline', route: '/(admin-tabs)/add-event'   },
     { icon: 'calendar-outline',   route: '/(admin-tabs)/calendar'    },
     { icon: 'star-outline',       route: '/(admin-tabs)/analytics'   },
