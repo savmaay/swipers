@@ -47,16 +47,34 @@ export default function SelectInterestsScreen() {
     );
   };
 
-  const handleSave = () => {
-    // Hand the baton back to edit-events
+  // Inside your SelectInterestsScreen component:
+
+const handleSave = () => {
+  if (params.onboardingParam) {
+    // RETURN TO ONBOARDING
+    const originalData = JSON.parse(params.onboardingParam as string);
+    const selectedLabels = INTERESTS.filter(i => selectedIds.includes(i.id)).map(i => i.label);
+
+    router.replace({
+      pathname: '/admin-onboarding/edit-demo-card', // Use your actual onboarding route name
+      params: { 
+        ...originalData,
+        updatedInterests: JSON.stringify(selectedLabels),
+        // Pass back the baton
+        onboardingParam: params.onboardingParam 
+      }
+    });
+  } else {
+    // RETURN TO MAIN ADMIN APP (Current code)
     router.replace({
       pathname: '/(admin-tabs)/edit-events',
       params: { 
         updatedInterests: JSON.stringify(selectedIds),
-        eventParam: params.eventParam // THE FIX: Relay the original event data back!
+        eventParam: params.eventParam 
       }
     });
-  };
+  }
+};
 
   return (
     <View style={styles.container}>

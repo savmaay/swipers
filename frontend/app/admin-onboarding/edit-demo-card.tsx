@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
@@ -57,7 +58,6 @@ function SwiperSpeech() {
             {!typingDone && <Text style={styles.cursor}>|</Text>}
           </Text>
         </View>
-        {/* Dots trailing bottom-right toward swiper */}
         <View style={[styles.dotsRow, { alignSelf: 'flex-end', marginRight: 8 }]}>
           <View style={styles.tailDot1} />
           <View style={styles.tailDot2} />
@@ -77,25 +77,50 @@ function SwiperSpeech() {
 // Screen 
 export default function EditDemoCardScreen() {
   const fontsLoaded = useAppFonts();
-  const params = useLocalSearchParams<{
-    title: string;
-    date: string;
-    time: string;
-    location: string;
-  }>();
+  const params = useLocalSearchParams();
 
   const [eventName, setEventName] = useState(params.title || '');
   const [date, setDate] = useState(params.date || '');
   const [time, setTime] = useState(params.time || '');
   const [location, setLocation] = useState(params.location || '');
-  const [description, setDescription] = useState('This event welcomes all students!');
-  const [interests, setInterests] = useState('Study, Social');
+  const [description, setDescription] = useState(params.description || 'This event welcomes all students!');
+  
+  // Track interests as an array for the picker
+  const [interests, setInterests] = useState<string[]>(
+    params.updatedInterests ? JSON.parse(params.updatedInterests as string) : ['Study', 'Social']
+  );
 
-  if (!fontsLoaded) return null;
+  // Update interests when coming back from picker
+  useEffect(() => {
+    if (params.updatedInterests) {
+      setInterests(JSON.parse(params.updatedInterests as string));
+    }
+  }, [params.updatedInterests]);
+
+  const goToInterests = () => {
+    // Pack current data into the onboardingParam "baton"
+    const currentState = JSON.stringify({
+      title: eventName,
+      date,
+      time,
+      location,
+      description
+    });
+
+    router.push({
+      pathname: '/admin-onboarding/select-interests',
+      params: { 
+        onboardingParam: currentState,
+        selected: JSON.stringify(interests) // Pass current labels
+      }
+    });
+  };
 
   const handleSave = () => {
     router.replace('/admin-onboarding/admin-profile-create');
   };
+
+  if (!fontsLoaded) return null;
 
   return (
     <LinearGradient
@@ -138,17 +163,20 @@ export default function EditDemoCardScreen() {
               multiline
             />
 
-            <Text style={styles.fieldLabel}>Interests (Select all that apply)</Text>
-            <TextInput style={styles.input} value={interests} onChangeText={setInterests} />
+            <Text style={styles.fieldLabel}>Interests</Text>
+            <TouchableOpacity style={styles.interestPickerButton} onPress={goToInterests}>
+              <Text style={styles.interestPickerText}>
+                {interests.length > 0 ? interests.join(', ') : "Select Interests"}
+              </Text>
+              <Ionicons name="chevron-forward" size={18} color={COLORS.deepNavy} />
+            </TouchableOpacity>
 
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
               <Text style={styles.saveButtonText}>Save Edits</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Swiper speech bubble at bottom */}
           <SwiperSpeech />
-
           <View style={{ height: 20 }} />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -166,7 +194,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-
   title: {
     fontFamily: FONTS.heading,
     fontSize: 36,
@@ -175,7 +202,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: 'center',
   },
-
   editFormCard: {
     width: '100%',
     backgroundColor: COLORS.apricotBlush,
@@ -205,6 +231,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(197,212,245,0.4)',
   },
+  interestPickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(197,212,245,0.4)',
+    marginTop: 2,
+  },
+  interestPickerText: {
+    fontFamily: FONTS.body,
+    fontSize: 14,
+    color: COLORS.deepNavy,
+    flex: 1,
+  },
   textArea: {
     height: 56,
     textAlignVertical: 'top',
@@ -223,8 +267,6 @@ const styles = StyleSheet.create({
     color: COLORS.ghostBlue,
     letterSpacing: 0.5,
   },
-
-  // Swiper speech bubble
   swiperRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
