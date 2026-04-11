@@ -74,7 +74,6 @@ export default function AdminAddDemoScreen() {
   const fontsLoaded = useAppFonts();
   const params = useLocalSearchParams();
 
-  // Pre-filled with defaults, but will use params if returning from interest picker
   const [eventName, setEventName]     = useState(params.title || 'SWE Study Session');
   const [date, setDate]               = useState(params.date || '03/20/2026');
   const [time, setTime]               = useState(params.time || '4:00 PM');
@@ -105,7 +104,7 @@ export default function AdminAddDemoScreen() {
       params: { 
         onboardingParam: currentState,
         selected: JSON.stringify(interests),
-        fromAdd: 'true' // Helpful tag to tell the picker where to return to
+        fromAdd: 'true' 
       }
     });
   };

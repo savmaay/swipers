@@ -16,10 +16,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
+import AdminTabBar from './AdminTabBar';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// SYNCED LIST: Matches your select-interests.tsx exactly
 const INTERESTS = [
   { id: '1',  label: 'Technology',   emoji: '💻' },
   { id: '2',  label: 'Art & Design', emoji: '🎨' },
@@ -46,32 +46,11 @@ const INTERESTS = [
   { id: '23', label: 'Psychology',       emoji: '🧠' },
 ];
 
-function AdminTabBar({ activeIndex = 0 }: { activeIndex?: number }) {
-  return (
-    <View style={styles.tabBar}>
-      {[0, 1, 2, 3].map((idx) => (
-        <TouchableOpacity 
-          key={idx} 
-          onPress={() => idx === 0 ? router.push('/(admin-tabs)') : null} // FIXED: Use folder path, not /index
-        >
-          <View style={[styles.tabIconWrapper, activeIndex === idx && styles.tabIconActive]}>
-            <Ionicons 
-               name={['pencil-outline', 'add-circle-outline', 'calendar-outline', 'star-outline'][idx] as any} 
-               size={28} 
-               color={activeIndex === idx ? '#fff' : COLORS.deepNavy} 
-            />
-          </View>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-}
 
 export default function EditEventsScreen() {
   const params = useLocalSearchParams();
   const fontsLoaded = useAppFonts();
   const initialEvent = params.eventParam ? JSON.parse(params.eventParam as string) : null;
-
   const [title, setTitle]       = useState(initialEvent?.title || '');
   const [date, setDate]         = useState(initialEvent?.date || '');
   const [time, setTime]         = useState(initialEvent?.time || '');
@@ -93,7 +72,6 @@ export default function EditEventsScreen() {
   };
 
   const goToInterests = () => {
-    // We create a "current state" object so you don't lose typed text
     const currentState = JSON.stringify({
         ...initialEvent,
         title, date, time, location, description: desc, interests
@@ -103,7 +81,7 @@ export default function EditEventsScreen() {
       pathname: '/admin-onboarding/select-interests',
       params: { 
         selected: JSON.stringify(INTERESTS.filter(i => interests.includes(i.label)).map(i => i.id)), 
-        eventParam: currentState // FIXED: Passing the data baton!
+        eventParam: currentState 
       }
     });
   };
@@ -141,12 +119,11 @@ export default function EditEventsScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      <AdminTabBar activeIndex={0} />
+      <AdminTabBar />
     </View>
   );
 }
 
-// ... styles remain the same
 const styles = StyleSheet.create({
   container: { flex: 1 },
   title: { fontFamily: FONTS.heading, fontSize: 39, color: COLORS.dustyTangerine, textDecorationLine: 'underline', textAlign: 'center', marginBottom: 4 },

@@ -14,6 +14,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
+import AdminTabBar from './AdminTabBar';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -35,39 +36,6 @@ const SAMPLE_EVENTS: AdminEvent[] = [
   { id: '4', club: 'CS Club', title: 'Semester Party!', date: 'April 10th', time: '7:00 pm', location: 'Little Hall', description: 'End of semester celebration! Games, food, and fun.', interests: ['Social', 'Technology'] },
 ];
 
-// ... (imports remain the same)
-
-function AdminTabBar({ activeIndex = 0 }: { activeIndex?: number }) {
-  const tabs = [
-    { icon: 'pencil-outline', path: '/(admin-tabs)/current-events' }, 
-    { icon: 'add-circle-outline', path: '/(admin-tabs)/add-event' }, 
-    { icon: 'calendar-outline', path: '/(admin-tabs)/calendar' }, 
-    { icon: 'star-outline', path: '/(admin-tabs)/favorites' }
-  ];
-
-  const handlePress = (index: number, path: string) => {
-    if (index === 0 && activeIndex === 0) {
-      // FIX: Use the folder path only to target index.tsx
-      router.push('/(admin-tabs)'); 
-    } else {
-      router.push(path as any);
-    }
-  };
-
-  return (
-    <View style={styles.tabBar}>
-      {tabs.map((tab, index) => (
-        <TouchableOpacity key={index} onPress={() => handlePress(index, tab.path)}>
-          <View style={[styles.tabIconWrapper, activeIndex === index && styles.tabIconActive]}>
-            <Ionicons name={tab.icon as any} size={28} color={activeIndex === index ? '#fff' : COLORS.deepNavy} />
-          </View>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-}
-
-// ... (Rest of CurrentEventsScreen remains the same)
 
 export default function CurrentEventsScreen() {
   const params = useLocalSearchParams();
@@ -106,7 +74,7 @@ export default function CurrentEventsScreen() {
         ))}
         <View style={{ height: 100 }} />
       </ScrollView>
-      <AdminTabBar activeIndex={0} />
+      <AdminTabBar />
     </View>
   );
 }

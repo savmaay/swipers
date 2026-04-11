@@ -37,7 +37,6 @@ const INTERESTS = [
 export default function SelectInterestsScreen() {
   const params = useLocalSearchParams();
   
-  // Parse existing selections if they were passed in
   const initialSelected = params.selected ? JSON.parse(params.selected as string) : [];
   const [selectedIds, setSelectedIds] = useState<string[]>(initialSelected);
 
@@ -47,25 +46,20 @@ export default function SelectInterestsScreen() {
     );
   };
 
-  // Inside your SelectInterestsScreen component:
-
 const handleSave = () => {
   if (params.onboardingParam) {
-    // RETURN TO ONBOARDING
     const originalData = JSON.parse(params.onboardingParam as string);
     const selectedLabels = INTERESTS.filter(i => selectedIds.includes(i.id)).map(i => i.label);
 
     router.replace({
-      pathname: '/admin-onboarding/edit-demo-card', // Use your actual onboarding route name
+      pathname: '/admin-onboarding/edit-demo-card', 
       params: { 
         ...originalData,
         updatedInterests: JSON.stringify(selectedLabels),
-        // Pass back the baton
         onboardingParam: params.onboardingParam 
       }
     });
   } else {
-    // RETURN TO MAIN ADMIN APP (Current code)
     router.replace({
       pathname: '/(admin-tabs)/edit-events',
       params: { 
