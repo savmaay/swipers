@@ -49,6 +49,12 @@ export default function CurrentEventsScreen() {
     }
   }, [params.updatedEvent]);
 
+  useEffect(() => {
+    if (params.deletedId) {
+      setEvents(prev => prev.filter(e => e.id !== params.deletedId));
+    }
+  }, [params.deletedId]);
+  
   if (!fontsLoaded) return null;
 
   return (
