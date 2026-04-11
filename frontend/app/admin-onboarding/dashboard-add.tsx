@@ -47,7 +47,7 @@ function SwiperWithBubble() {
 
   return (
     <View style={styles.swiperSection}>
-      {/* Speech bubble above fox */}
+      {/* Speech bubble above swiper */}
       <View style={styles.speechBubble}>
         <Text style={styles.speechText}>
           {displayedText}
@@ -92,7 +92,7 @@ function AnimatedDownArrow() {
 function DemoNavBar() {
   const tabs = [
     { icon: 'pencil-outline',   isPlus: false },
-    { icon: 'add-circle-outline', isPlus: true  },  // ← the one to click
+    { icon: 'add-circle-outline', isPlus: true  },  
     { icon: 'calendar-outline', isPlus: false },
     { icon: 'star-outline',     isPlus: false },
   ];

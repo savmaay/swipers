@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
+import AdminTabBar from './AdminTabBar';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -94,46 +95,6 @@ function Cloud({
   );
 }
 
-// Admin Tab Bar
-function AdminTabBar({ activeTab = -1 }: { activeTab?: number }) {
-  const tabs = [
-    { icon: 'pencil-outline',     route: '/(admin-tabs)/current-events'   },
-    { icon: 'add-circle-outline', route: '/(admin-tabs)/add-event'   },
-    { icon: 'calendar-outline',   route: '/(admin-tabs)/calendar'    },
-    { icon: 'star-outline',       route: '/(admin-tabs)/analytics'   },
-  ];
-
-  const handlePress = (index: number) => {
-    if (activeTab === index) {
-      // Re-press active tab → go back to dashboard
-      router.push('/(admin-tabs)');
-      return;
-    }
-    router.push(tabs[index].route as any);
-  };
-
-  return (
-    <View style={styles.tabBar}>
-      {tabs.map((tab, index) => (
-        <TouchableOpacity
-          key={index}
-          style={styles.tabItem}
-          activeOpacity={0.7}
-          onPress={() => handlePress(index)}
-        >
-          <View style={[styles.tabIconWrapper, activeTab === index && styles.tabIconActive]}>
-            <Ionicons
-              name={tab.icon as any}
-              size={28}
-              color={activeTab === index ? '#fff' : COLORS.deepNavy}
-            />
-          </View>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-}
-
 // Screen 
 export default function AdminDashboardScreen() {
   const fontsLoaded = useAppFonts();
@@ -167,7 +128,7 @@ export default function AdminDashboardScreen() {
       {/* Profile / avatar icon top right — routes to profile editing */}
       <TouchableOpacity
         style={styles.profileButton}
-        onPress={() => router.push('/(admin-tabs)/profile')}
+        onPress={() => router.push('/(admin-tabs)/admin-profile')}
         activeOpacity={0.8}
       >
         <Ionicons name="person-circle-outline" size={42} color={COLORS.deepNavy} />
@@ -219,7 +180,7 @@ export default function AdminDashboardScreen() {
       />
 
       {/* Admin tab bar */}
-      <AdminTabBar activeTab={-1} />
+      <AdminTabBar/>
     </View>
   );
 }

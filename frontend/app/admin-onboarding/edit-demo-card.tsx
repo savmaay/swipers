@@ -98,7 +98,6 @@ export default function EditDemoCardScreen() {
   }, [params.updatedInterests]);
 
   const goToInterests = () => {
-    // Pack current data into the onboardingParam "baton"
     const currentState = JSON.stringify({
       title: eventName,
       date,
@@ -111,7 +110,7 @@ export default function EditDemoCardScreen() {
       pathname: '/admin-onboarding/select-interests',
       params: { 
         onboardingParam: currentState,
-        selected: JSON.stringify(interests) // Pass current labels
+        selected: JSON.stringify(interests) 
       }
     });
   };

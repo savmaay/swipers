@@ -1,5 +1,3 @@
-//Sample code for testing
-
 import React, { useState } from 'react';
 import {
   View,
