@@ -19,9 +19,9 @@ const TABS = [
   },
   {
     icon: 'calendar-outline'   as const,
-    segment: 'calendar',
+    segment: 'admin-calendar', 
     extraSegments: [] as string[],
-    route:   '/(admin-tabs)/calendar',
+    route:   '/(admin-tabs)/admin-calendar',
   },
   {
     icon: 'star-outline'       as const,

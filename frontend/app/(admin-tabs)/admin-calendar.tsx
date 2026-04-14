@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
+import AdminTabBar from './AdminTabBar'; // Ensure this path is correct
 
 type ViewType = 'daily' | 'weekly' | 'monthly';
 
@@ -42,20 +43,13 @@ function toDateKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-/**
- * Checks if an event is in the past based on current date and hour.
- */
 function isPastEvent(dateStr: string, hour: number): boolean {
   const now = new Date();
   const eventDateParts = dateStr.split('-').map(Number);
   const eventDate = new Date(eventDateParts[0], eventDateParts[1] - 1, eventDateParts[2]);
-  
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  
   if (eventDate < today) return true;
   if (eventDate > today) return false;
-  
-  // If it's today, check the hour
   return hour < now.getHours();
 }
 
@@ -169,7 +163,8 @@ export default function CalendarScreen() {
         onUnadd={handleUnadd} 
       />
       
-      <View style={{ height: 90 }} />
+      {/* RENDER THE TAB BAR LAST FOR PROPER Z-INDEX */}
+      <AdminTabBar />
     </View>
   );
 }
@@ -297,11 +292,12 @@ const MonthlyView = ({ date, eventsFunc }: any) => {
 
   return (
     <View style={styles.monthlyBlueBox}>
-      <div style={styles.gridHeader}>
+      {/* FIXED: Changed <div> to <View> */}
+      <View style={styles.gridHeader}>
         {['S','M','T','W','T','F','S'].map((d, i) => (
           <Text key={`hdr-${i}`} style={styles.gridHeaderText}>{d}</Text>
         ))}
-      </div>
+      </View>
       {rows.map((row, ri) => (
         <View key={`row-${ri}`} style={styles.gridRow}>
           {row.map((cell) => {
@@ -314,7 +310,7 @@ const MonthlyView = ({ date, eventsFunc }: any) => {
                   <Text style={[styles.dayText, isToday && styles.dayTextToday]}>{cell.d}</Text>
                 </View>
                 {info && (
-                  <View style={[styles.dayBadge, info.conflict && { backgroundColor: COLORS.error }]}>
+                  <View style={[styles.dayBadge, info.conflict && { backgroundColor: '#FF6B6B' }]}>
                     <Text style={styles.badgeText}>{info.count}</Text>
                   </View>
                 )}
@@ -350,11 +346,9 @@ const EventDetailModal = ({ event, onClose, onUnadd }: { event: CalEvent | null,
                 ))}
               </View>
             </ScrollView>
-            
             <TouchableOpacity style={styles.unaddButton} onPress={() => onUnadd(event.id)}>
               <Text style={styles.unaddText}>Remove from Calendar</Text>
             </TouchableOpacity>
-            
             <Text style={styles.tapHint}>← Tap anywhere to close</Text>
           </TouchableOpacity>
         </View>
@@ -369,7 +363,7 @@ const styles = StyleSheet.create({
   container:      { flex: 1, backgroundColor: COLORS.skyIris },
   header:         { paddingTop: 60, paddingBottom: 10, alignItems: 'center' },
   headerTitle:    { fontSize: 40, fontFamily: FONTS.heading, color: COLORS.dustyTangerine },
-  contentCard:    { flex: 1, backgroundColor: COLORS.apricotBlush, marginHorizontal: 20, marginBottom: 50, marginTop: 20, borderRadius: 40, overflow: 'hidden' },
+  contentCard:    { flex: 1, backgroundColor: COLORS.apricotBlush, marginHorizontal: 20, marginBottom: 100, marginTop: 20, borderRadius: 40, overflow: 'hidden' },
   scrollArea:     { flex: 1 }, 
   scrollCentered: { flexGrow: 1, justifyContent: 'center' },
   dateDisplay:  { backgroundColor: COLORS.ghostBlue, marginHorizontal: 30, marginTop: 20, borderRadius: 25, paddingVertical: 8, alignItems: 'center' },
@@ -383,12 +377,12 @@ const styles = StyleSheet.create({
   viewPadding: { padding: 20 },
   emptyBox:  { backgroundColor: COLORS.mutedSapphire, padding: 14, borderRadius: 20, alignItems: 'center' },
   emptyText: { fontFamily: FONTS.body, color: COLORS.ghostBlue, fontSize: 13 },
-  eventRow:        { marginBottom: 12 },
+  eventRow:         { marginBottom: 12 },
   timeLabel:       { fontSize: 11, fontFamily: FONTS.body, color: COLORS.mutedSapphire, marginBottom: 2 },
   eventBox:        { backgroundColor: COLORS.mutedSapphire, padding: 12, borderRadius: 20 },
   eventText:       { fontFamily: FONTS.body, color: COLORS.ghostBlue, fontSize: 12 },
-  conflictBorder:  { borderWidth: 2, borderColor: COLORS.error },
-  conflictTextRed: { fontFamily: FONTS.body, color: COLORS.error, fontSize: 10, fontStyle: 'italic', marginTop: 8, textAlign: 'center' },
+  conflictBorder:  { borderWidth: 2, borderColor: '#FF6B6B' },
+  conflictTextRed: { fontFamily: FONTS.body, color: '#FF6B6B', fontSize: 10, fontStyle: 'italic', marginTop: 8, textAlign: 'center' },
   weekRow:             { flexDirection: 'row', marginBottom: 12, borderBottomWidth: 1, borderBottomColor: COLORS.periwinkleMist, paddingBottom: 8 },
   weekLabelBox:        { width: 68 },
   weekDayText:         { fontSize: 12, fontFamily: FONTS.body, color: COLORS.mutedSapphire },
@@ -397,9 +391,9 @@ const styles = StyleSheet.create({
   weekEventBox:        { flex: 1 },
   eventBoxSmall:       { backgroundColor: COLORS.mutedSapphire, borderRadius: 12, padding: 8 },
   eventBoxSmallSpaced: { marginBottom: 4 },
-  conflictBorderSmall: { borderWidth: 1.5, borderColor: COLORS.error },
+  conflictBorderSmall: { borderWidth: 1.5, borderColor: '#FF6B6B' },
   eventTextSmall:      { fontFamily: FONTS.body, color: COLORS.ghostBlue, fontSize: 10 },
-  conflictTextSmall:   { fontFamily: FONTS.body, color: COLORS.error, fontSize: 9, fontStyle: 'italic', marginTop: 2 },
+  conflictTextSmall:   { fontFamily: FONTS.body, color: '#FF6B6B', fontSize: 9, fontStyle: 'italic', marginTop: 2 },
   monthlyBlueBox:      { backgroundColor: COLORS.mutedSapphire, marginHorizontal: 12, marginVertical: 12, borderRadius: 28, padding: 16, alignSelf: 'stretch' },
   gridHeader:          { flexDirection: 'row', marginBottom: 10 },
   gridHeaderText:      { flex: 1, fontFamily: FONTS.body, color: COLORS.ghostBlue, textAlign: 'center', fontSize: 13 },
@@ -411,7 +405,7 @@ const styles = StyleSheet.create({
   dayTextToday:        { color: COLORS.ghostBlue },
   dayBadge:            { position: 'absolute', bottom: 0, right: '10%', backgroundColor: COLORS.warmMelon, width: 17, height: 17, borderRadius: 9, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: COLORS.ghostBlue },
   badgeText:           { fontFamily: FONTS.body, color: COLORS.ghostBlue, fontSize: 9 },
-  monthlyConflictText: { fontFamily: FONTS.body, color: COLORS.error, fontSize: 12, fontStyle: 'italic', textAlign: 'center', marginTop: 8 },
+  monthlyConflictText: { fontFamily: FONTS.body, color: '#FF6B6B', fontSize: 12, fontStyle: 'italic', textAlign: 'center', marginTop: 8 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 20 },
   cardBack: { height: '60%', borderRadius: 30, padding: 25, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 15, elevation: 10 },
   cardBackInner: { flex: 1 },
@@ -422,15 +416,9 @@ const styles = StyleSheet.create({
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 20 },
   tag: { backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginRight: 8, marginBottom: 8 },
   tagText: { color: COLORS.ghostBlue, fontSize: 11, fontFamily: FONTS.body },
-  unaddButton: { backgroundColor: COLORS.error, paddingVertical: 14, borderRadius: 18, alignItems: 'center', marginTop: 10 },
+  unaddButton: { backgroundColor: '#FF6B6B', paddingVertical: 14, borderRadius: 18, alignItems: 'center', marginTop: 10 },
   unaddText: { color: 'white', fontFamily: FONTS.heading, fontSize: 14 },
   tapHint: { textAlign: 'center', color: COLORS.ghostBlue, opacity: 0.5, fontSize: 10, marginTop: 15 },
-  pastEventBox: {
-    backgroundColor: '#D1D1D1', 
-    opacity: 0.7,
-  },
-  crossedOutText: {
-    textDecorationLine: 'line-through',
-    color: '#757575',
-  },
+  pastEventBox: { backgroundColor: '#D1D1D1', opacity: 0.7 },
+  crossedOutText: { textDecorationLine: 'line-through', color: '#757575' },
 });
