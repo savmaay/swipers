@@ -6,7 +6,8 @@ export default function AdminTabLayout() {
       <Tabs.Screen name="current-events" />
       <Tabs.Screen name="edit-events" /> 
       <Tabs.Screen name="add-event" />
-      <Tabs.Screen name="calendar" />
+      <Tabs.Screen name="admin-calendar" />
+      <Tabs.Screen name="admin-profile" />
       <Tabs.Screen name="feedback" />
       <Tabs.Screen name="AdminTabBar" />
     </Tabs>
