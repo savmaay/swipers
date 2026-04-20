@@ -597,7 +597,21 @@ export default function SwipeScreen() {
     console.log('PARSED INTERESTS:', interests);
 
     if (!interests.length) {
-      setEvents(SAMPLE_EVENTS);
+      const stored =
+        await AsyncStorage.getItem('adminEvents');
+
+      const custom = stored
+        ? JSON.parse(stored)
+        : [];
+
+      setEvents([
+        ...SAMPLE_EVENTS,
+        ...custom.map((e: any) => ({
+          ...e,
+          tags: e.interests,
+          color: COLORS.apricotBlush,
+        })),
+      ]);
       return;
     }
 

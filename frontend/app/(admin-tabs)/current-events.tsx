@@ -15,6 +15,7 @@ import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
 import AdminTabBar from './AdminTabBar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -40,20 +41,26 @@ const SAMPLE_EVENTS: AdminEvent[] = [
 export default function CurrentEventsScreen() {
   const params = useLocalSearchParams();
   const fontsLoaded = useAppFonts();
-  const [events, setEvents] = useState<AdminEvent[]>(SAMPLE_EVENTS);
+  const [events, setEvents] =
+  useState<AdminEvent[]>([]);
 
   useEffect(() => {
-    if (params.updatedEvent) {
-      const updated = JSON.parse(params.updatedEvent as string);
-      setEvents(prev => prev.map(e => e.id === updated.id ? updated : e));
-    }
-  }, [params.updatedEvent]);
+    const loadEvents = async () => {
+      const stored =
+        await AsyncStorage.getItem('adminEvents');
 
-  useEffect(() => {
-    if (params.deletedId) {
-      setEvents(prev => prev.filter(e => e.id !== params.deletedId));
-    }
-  }, [params.deletedId]);
+      const custom = stored
+        ? JSON.parse(stored)
+        : [];
+
+      setEvents([
+        ...SAMPLE_EVENTS,
+        ...custom,
+      ]);
+    };
+
+    loadEvents();
+  }, []);
   
   if (!fontsLoaded) return null;
 

@@ -11,6 +11,8 @@ import {
 import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import AdminTabBar from './AdminTabBar'; // Ensure this path is correct
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect } from 'react';
 
 type ViewType = 'daily' | 'weekly' | 'monthly';
 
@@ -80,12 +82,60 @@ function getTimeCounts(events: CalEvent[]): Record<string, number> {
   return counts;
 }
 
+function convertDate(raw: string) {
+  const parts = raw.split('/'); // MM/DD/YY
+  return `20${parts[2]}-${parts[0]}-${parts[1]}`;
+}
+
+function parseHour(time: string) {
+  const [h] = time.split(':');
+  return parseInt(h);
+}
+
 // --- Main Screen ---
 
 export default function CalendarScreen() {
   const [view, setView] = useState<ViewType>('daily');
-  const [events, setEvents] = useState<CalEvent[]>(MOCK_EVENTS);
-  const [selectedEvent, setSelectedEvent] = useState<CalEvent | null>(null);
+
+  const [events, setEvents] =
+    useState<CalEvent[]>([]);
+
+  const [selectedEvent, setSelectedEvent] =
+    useState<CalEvent | null>(null);
+
+  useEffect(() => {
+    const loadCalendar = async () => {
+      const stored =
+        await AsyncStorage.getItem(
+          'adminEvents'
+        );
+
+      const custom = stored
+        ? JSON.parse(stored)
+        : [];
+
+      const converted = custom.map(
+        (event: any) => ({
+          id: event.id,
+          date: convertDate(event.date),
+          time: event.time,
+          timeHour: parseHour(event.time),
+          title: event.title,
+          club: event.club,
+          description: event.description,
+          tags: event.interests,
+          color: COLORS.warmMelon,
+        })
+      );
+
+      setEvents([
+        ...MOCK_EVENTS,
+        ...converted,
+      ]);
+    };
+
+    loadCalendar();
+  }, []);
 
   const getEventsForDate = (date: Date) => {
     return events.filter(e => e.date === toDateKey(date)).sort((a, b) => a.timeHour - b.timeHour);

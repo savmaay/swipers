@@ -19,6 +19,7 @@ import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
 import AdminTabBar from './AdminTabBar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -77,9 +78,9 @@ export default function AddEventScreen() {
     setEditingIds([]);
   };
 
-  const handleSave = () => {
-    const dateRegex = /^\d{2}\/\d{2}\/\d{2}$/; // MM/DD/YY
-    const timeRegex = /^\d{2}:\d{2}$/;        // HH:MM
+  const handleSave = async () => {
+    const dateRegex = /^\d{2}\/\d{2}\/\d{2}$/;
+    const timeRegex = /^\d{2}:\d{2}$/;
 
     if (!title || !date || !time) {
       Alert.alert('Missing Info', 'Please provide a name, date, and time.');
@@ -87,27 +88,74 @@ export default function AddEventScreen() {
     }
 
     if (!dateRegex.test(date)) {
-      Alert.alert('Format Error', 'Please use MM/DD/YY for the date.');
+      Alert.alert('Format Error', 'Use MM/DD/YY');
       return;
     }
 
     if (!timeRegex.test(time)) {
-      Alert.alert('Format Error', 'Please use HH:MM for the time.');
+      Alert.alert('Format Error', 'Use HH:MM');
       return;
     }
 
-    const newEvent = { title, date, time, location, description: desc, interests: interestLabels };
+    const newEvent = {
+      id: Date.now().toString(),
+      club: 'Your Organization',
+      title,
+      date,
+      time,
+      location,
+      description: desc,
+      interests: interestLabels,
+    };
 
-    Alert.alert('Success', 'Event created successfully!', [
+    const stored =
+      await AsyncStorage.getItem('adminEvents');
+
+    const existing = stored
+      ? JSON.parse(stored)
+      : [];
+
+    const updated = [...existing, newEvent];
+
+    await AsyncStorage.setItem(
+      'adminEvents',
+      JSON.stringify(updated)
+    );
+
+    const storedCalendar =
+      await AsyncStorage.getItem(
+        'adminCalendarEvents'
+      );
+
+    const currentCalendar =
+      storedCalendar
+        ? JSON.parse(storedCalendar)
+        : [];
+
+    const calendarEvent = {
+      id: newEvent.id,
+      title: newEvent.title,
+      club: newEvent.club,
+      date: newEvent.date,
+      time: newEvent.time,
+      location: newEvent.location,
+      description: newEvent.description,
+    };
+
+    await AsyncStorage.setItem(
+      'adminCalendarEvents',
+      JSON.stringify([
+        ...currentCalendar,
+        calendarEvent,
+      ])
+    );
+
+    Alert.alert('Success', 'Event created!', [
       {
         text: 'OK',
         onPress: () => {
-          // Reset for another addition instead of just navigating away
           resetForm();
-          router.replace({
-            pathname: '/(admin-tabs)/current-events',
-            params: { newEvent: JSON.stringify(newEvent) },
-          });
+          router.replace('/(admin-tabs)/current-events');
         },
       },
     ]);
