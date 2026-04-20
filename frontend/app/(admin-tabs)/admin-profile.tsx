@@ -17,6 +17,7 @@ import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AdminTabBar from './AdminTabBar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ── Avatar Map ───────────────────────────────────────────────────────────────
 
@@ -53,9 +54,18 @@ export default function AdminProfileScreen() {
     selectedAvatar: 'owl' as AvatarKey,
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setLoading(true);
-    setTimeout(() => { setLoading(false); setIsEditing(false); }, 800);
+
+    await AsyncStorage.setItem(
+      'adminOrgName',
+      profile.organizationName
+    );
+
+    setTimeout(() => {
+      setLoading(false);
+      setIsEditing(false);
+    }, 800);
   };
 
   if (!fontsLoaded) return null;

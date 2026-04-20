@@ -15,6 +15,8 @@ import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
 import AdminTabBar from './AdminTabBar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState } from 'react';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -102,18 +104,51 @@ export default function AdminDashboardScreen() {
   const slideAnim   = useRef(new Animated.Value(30)).current;
 
   // TODO: replace with real admin data from auth context / API
-  const adminName = '';
-  const stats = {
-    eventsToday:    4,
+  const [adminName, setAdminName] =
+    useState('Organization');
+
+  const [stats, setStats] = useState({
+    eventsToday: 4,
     peopleAttending: 80,
-    newRatings:     2,
-  };
+    newRatings: 2,
+  });
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
       Animated.timing(slideAnim, { toValue: 0, duration: 700, useNativeDriver: true }),
     ]).start();
+  }, []);
+
+  useEffect(() => {
+    const loadAdminData = async () => {
+      let storedName =
+        await AsyncStorage.getItem('adminOrgName');
+
+      if (!storedName) {
+        storedName = 'Society of PC Building';
+
+        await AsyncStorage.setItem(
+          'adminOrgName',
+          storedName
+        );
+      }
+
+      setAdminName(storedName);
+
+      setStats({
+        eventsToday:
+          Math.floor(Math.random() * 6) + 1,
+
+        peopleAttending:
+          Math.floor(Math.random() * 120) + 25,
+
+        newRatings:
+          Math.floor(Math.random() * 5) + 1,
+      });
+    };
+
+    loadAdminData();
   }, []);
 
   if (!fontsLoaded) return null;

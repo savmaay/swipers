@@ -200,6 +200,21 @@ export default function ProfileScreen() {
     foxCoins: 0,
   });
 
+  useEffect(() => {
+    const syncDefaultName = async () => {
+      const stored = await AsyncStorage.getItem('profileName');
+
+      if (!stored) {
+        await AsyncStorage.setItem(
+          'profileName',
+          profile.name
+        );
+      }
+    };
+
+    syncDefaultName();
+  }, []);
+
   const [selectedInterestLabels, setSelectedInterestLabels] = useState<string[]>(
     ['Gaming', 'Art & Design', 'Science']
   );
@@ -261,9 +276,18 @@ export default function ProfileScreen() {
     setIsEditingInterests(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setLoading(true);
-    setTimeout(() => { setLoading(false); setIsEditing(false); }, 800);
+
+    await AsyncStorage.setItem(
+      'profileName',
+      profile.name
+    );
+
+    setTimeout(() => {
+      setLoading(false);
+      setIsEditing(false);
+    }, 800);
   };
 
   if (!fontsLoaded) return null;
