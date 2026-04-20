@@ -14,6 +14,8 @@ import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
 import AdminTabBar from './AdminTabBar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect } from 'react';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -90,16 +92,50 @@ function FeedbackCard({ event }: { event: FeedbackEvent }) {
 // Screen 
 export default function FeedbackScreen() {
   const fontsLoaded = useAppFonts();
-  const [events] = useState<FeedbackEvent[]>(SAMPLE_FEEDBACK);
 
-  // TODO: fetch event feedback from API
-  // useEffect(() => {
-  //   fetch(`${API_BASE_URL}/api/events/feedback`, {
-  //     headers: { 'x-auth-token': token }
-  //   })
-  //   .then(res => res.json())
-  //   .then(data => setEvents(data));
-  // }, []);
+  const [events, setEvents] =
+    useState<FeedbackEvent[]>(SAMPLE_FEEDBACK);
+
+  useEffect(() => {
+    const loadRatings = async () => {
+      const stored =
+        await AsyncStorage.getItem('userRatings');
+
+      if (!stored) return;
+
+      const ratings = JSON.parse(stored);
+
+      const updated = SAMPLE_FEEDBACK.map(event => {
+        const match = ratings.find(
+          (r: any) =>
+            r.id === event.id &&
+            r.rating > 0
+        );
+
+        if (!match) return event;
+
+        const newTotal =
+          event.totalRatings + 1;
+
+        const newAverage =
+          (
+            event.averageRating *
+            event.totalRatings +
+            match.rating
+          ) / newTotal;
+
+        return {
+          ...event,
+          totalRatings: newTotal,
+          averageRating: newAverage,
+        };
+      });
+
+      setEvents(updated);
+    };
+
+    loadRatings();
+  }, []);
 
   if (!fontsLoaded) return null;
 

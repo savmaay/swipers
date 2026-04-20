@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -84,12 +85,17 @@ export default function SavedScreen() {
 
   // TODO: fetch attended events from API
 
-  const handleRate = (id: string, stars: number) => {
-    setEvents(prev =>
-      prev.map(e => e.id === id ? { ...e, rating: stars } : e)
+  const handleRate = async (id: string, stars: number) => {
+    const updated = events.map(e =>
+      e.id === id ? { ...e, rating: stars } : e
     );
 
-    // TODO: send rating to API
+    setEvents(updated);
+
+    await AsyncStorage.setItem(
+      'userRatings',
+      JSON.stringify(updated)
+    );
   };
 
   if (!fontsLoaded) return null;

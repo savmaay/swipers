@@ -136,6 +136,18 @@ export default function AdminDashboardScreen() {
 
       setAdminName(storedName);
 
+      const storedRatings =
+        await AsyncStorage.getItem('userRatings');
+
+      const parsedRatings = storedRatings
+        ? JSON.parse(storedRatings)
+        : [];
+
+      const ratingsCount =
+        parsedRatings.filter(
+          (item: any) => item.rating > 0
+        ).length;
+
       setStats({
         eventsToday:
           Math.floor(Math.random() * 6) + 1,
@@ -143,8 +155,7 @@ export default function AdminDashboardScreen() {
         peopleAttending:
           Math.floor(Math.random() * 120) + 25,
 
-        newRatings:
-          Math.floor(Math.random() * 5) + 1,
+        newRatings: ratingsCount,
       });
     };
 
