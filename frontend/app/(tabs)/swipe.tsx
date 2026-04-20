@@ -1,4 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect, router } from 'expo-router';
 import {
   View,
   Text,
@@ -40,7 +42,7 @@ const SAMPLE_EVENTS: Event[] = [
     id: '1',
     title: 'SWE Picnic Social!',
     club: 'Society of Women Engineers',
-    date: 'March 30th',
+    date: 'April 25th',
     time: '5:00 pm',
     location: 'Plaza of Americas',
     description: 'This event welcomes all students for a fun spring picnic to relieve stress and allow students to network. You do not have to be a member of the club to attend, everyone is welcome!',
@@ -51,7 +53,7 @@ const SAMPLE_EVENTS: Event[] = [
     id: '2',
     title: 'Gator Club Study Session!',
     club: 'Gator Club',
-    date: 'March 18th',
+    date: 'April 22th',
     time: '6:30 pm',
     location: 'Marston Library',
     description: 'Join fellow students for a group study session. All majors welcome. Snacks provided!',
@@ -62,7 +64,7 @@ const SAMPLE_EVENTS: Event[] = [
     id: '3',
     title: 'AI Club Info Session!',
     club: 'AI Club',
-    date: 'April 2nd',
+    date: 'April 21st',
     time: '1:00 pm',
     location: 'Malachowsky Hall',
     description: 'Learn about what AI Club does, upcoming projects, and how to get involved. Open to all students interested in artificial intelligence.',
@@ -73,7 +75,7 @@ const SAMPLE_EVENTS: Event[] = [
     id: '4',
     title: 'CS Club Semester Party!',
     club: 'CS Club',
-    date: 'April 10th',
+    date: 'April 20th',
     time: '7:00 pm',
     location: 'Little Hall',
     description: 'End of semester celebration! Games, food, and fun. Come hang out with fellow CS students.',
@@ -84,7 +86,7 @@ const SAMPLE_EVENTS: Event[] = [
     id: '5',
     title: 'Photography Walk',
     club: 'UF Photography Club',
-    date: 'April 15th',
+    date: 'April 25th',
     time: '4:00 pm',
     location: 'Gainesville Downtown',
     description: 'Explore Gainesville through a lens! Bring your camera or phone. All skill levels welcome.',
@@ -580,11 +582,51 @@ useEffect(() => {
 // Main Swipe Screen
 export default function SwipeScreen() {
   const fontsLoaded = useAppFonts();
-  const [events, setEvents]           = useState<Event[]>(SAMPLE_EVENTS);
+  const [events, setEvents] = useState<Event[]>([]);
   const [likedEvents, setLikedEvents] = useState<Event[]>([]);
   const [triggerSwipe, setTriggerSwipe] = useState<'left' | 'right' | null>(null);
   const [showSummary, setShowSummary] = useState(false);
+  const [seenIds, setSeenIds] = useState<string[]>([]);
   // Show summary automatically when all events are swiped
+  
+  const loadFeed = useCallback(async () => {
+    const stored = await AsyncStorage.getItem('userInterests');
+    console.log('RAW STORAGE:', stored);
+
+    const interests = stored ? JSON.parse(stored) : [];
+    console.log('PARSED INTERESTS:', interests);
+
+    if (!interests.length) {
+      setEvents(SAMPLE_EVENTS);
+      return;
+    }
+
+    const unseen = SAMPLE_EVENTS.filter(
+      event => !seenIds.includes(event.id)
+    );
+
+    const ranked = [...unseen]
+      .map(event => {
+        const score = event.tags.filter(tag =>
+          interests.some(
+            interest =>
+              interest.toLowerCase() === tag.toLowerCase()
+          )
+        ).length;
+
+        return { ...event, score };
+      })
+      .sort((a, b) => b.score - a.score);
+
+    setEvents(ranked);
+  }, [seenIds]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadFeed();
+    }, [loadFeed])
+  );
+
   useEffect(() => {
     if (events.length === 0 && likedEvents.length > 0) {
       setShowSummary(true);
@@ -593,27 +635,98 @@ export default function SwipeScreen() {
 
   const handleSwipeLeft = useCallback(() => {
     setTriggerSwipe(null);
+
     setEvents(prev => {
-      const next = prev.slice(1);
-      // If no more events, close summary and show caught up page
-      if (next.length === 0) {
-        setShowSummary(false);
+      const removed = prev[0];
+      if (removed) {
+        setSeenIds(ids => [...ids, removed.id]);
       }
-      return next;
+      return prev.slice(1);
     });
   }, []);
 
+  const parseTimeHour = (time: string) => {
+    const [rawHour, minutePart] = time.split(':');
+    let hour = parseInt(rawHour);
+    const isPm = time.toLowerCase().includes('pm');
+
+    if (isPm && hour !== 12) hour += 12;
+    if (!isPm && hour === 12) hour = 0;
+
+    return hour;
+  };
+
+  const convertDate = (rawDate: string) => {
+    const cleaned = rawDate.replace(/(st|nd|rd|th)/g, '');
+
+    const parts = cleaned.split(' ');
+    const month = parts[0];
+    const day = parts[1];
+
+    const months: Record<string, string> = {
+      January: '01',
+      February: '02',
+      March: '03',
+      April: '04',
+      May: '05',
+      June: '06',
+      July: '07',
+      August: '08',
+      September: '09',
+      October: '10',
+      November: '11',
+      December: '12',
+    };
+
+    return `2026-${months[month]}-${day.padStart(2, '0')}`;
+  };
+
+  const saveToCalendar = async (event: Event) => {
+    try {
+      const stored = await AsyncStorage.getItem('calendarEvents');
+      const current = stored ? JSON.parse(stored) : [];
+
+      const exists = current.some((e: any) => e.id === event.id);
+
+      if (exists) return;
+
+      const newEvent = {
+        id: event.id,
+        title: event.title,
+        club: event.club,
+        description: event.description,
+        tags: event.tags,
+        color: event.color,
+
+        date: convertDate(event.date),
+        time: event.time,
+        timeHour: parseTimeHour(event.time),
+      };
+
+      await AsyncStorage.setItem(
+        'calendarEvents',
+        JSON.stringify([...current, newEvent])
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const handleSwipeRight = useCallback(() => {
     setTriggerSwipe(null);
+
     setEvents(prev => {
       const liked = prev[0];
-      if (liked) setLikedEvents(l => [...l, liked]);
-      const next = prev.slice(1);
-      // If no more events, close summary and show caught up page
-      if (next.length === 0) {
-        setShowSummary(false);
+
+      if (liked) {
+        setLikedEvents(current => [...current, liked]);
+
+        setSeenIds(ids => [...ids, liked.id]);
+
+        saveToCalendar(liked);
       }
-      return next;
+
+      return prev.slice(1);
     });
   }, []);
 
@@ -632,12 +745,20 @@ export default function SwipeScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={[COLORS.periwinkleMist, '#dce6fb', COLORS.periwinkleMist]}
-        style={StyleSheet.absoluteFill}
-      />
+      <View style={styles.headerContainer}>
+        <Text style={styles.screenTitle}>New Events</Text>
 
-      <Text style={styles.screenTitle}>New Events</Text>
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={() => router.push('/(tabs)/profile')}
+        >
+          <Ionicons
+            name="person-circle"
+            size={40}
+            color={COLORS.mutedSapphire}
+          />
+        </TouchableOpacity>
+      </View>
 
       {events.length > 0 ? (
         <View style={styles.cardStack}>
@@ -698,8 +819,26 @@ export default function SwipeScreen() {
 // Styles
 const styles = StyleSheet.create({
   container: {
-    flex: 1, alignItems: 'center',
-    paddingTop: SCREEN_HEIGHT * 0.07, paddingBottom: 20,
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: COLORS.ghostBlue,
+    paddingTop: SCREEN_HEIGHT * 0.07,
+    paddingBottom: 20,
+  },
+
+  headerContainer: {
+    width: '100%',
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+
+  profileButton: {
+    position: 'absolute',
+    top: 0,
+    right: 18,
+    zIndex: 10,
   },
   screenTitle: {
     fontFamily: FONTS.heading, fontSize: 40,

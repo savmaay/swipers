@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from 'expo-router';
 
 type ViewType = 'daily' | 'weekly' | 'monthly';
 
@@ -90,9 +92,22 @@ function getTimeCounts(events: CalEvent[]): Record<string, number> {
 
 export default function CalendarScreen() {
   const [view, setView] = useState<ViewType>('daily');
-  const [events, setEvents] = useState<CalEvent[]>(MOCK_EVENTS);
+  const [events, setEvents] = useState<CalEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<CalEvent | null>(null);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadCalendar = async () => {
+        const stored = await AsyncStorage.getItem('calendarEvents');
+        const parsed = stored ? JSON.parse(stored) : [];
+
+        setEvents([...MOCK_EVENTS, ...parsed]);
+      };
+
+      loadCalendar();
+    }, [])
+  );
+  
   const getEventsForDate = (date: Date) => {
     return events.filter(e => e.date === toDateKey(date)).sort((a, b) => a.timeHour - b.timeHour);
   };

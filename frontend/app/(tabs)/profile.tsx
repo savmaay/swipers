@@ -17,6 +17,7 @@ import { COLORS } from '@/constants/colors';
 import { FONTS } from '@/constants/fonts';
 import { useAppFonts } from '@/hooks/useAppFonts';
 import { useRouter, useFocusEffect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ── Avatar Map ───────────────────────────────────────────────────────────────
 
@@ -202,6 +203,21 @@ export default function ProfileScreen() {
   const [selectedInterestLabels, setSelectedInterestLabels] = useState<string[]>(
     ['Gaming', 'Art & Design', 'Science']
   );
+  useFocusEffect(
+    useCallback(() => {
+      const loadSavedInterests = async () => {
+        const stored = await AsyncStorage.getItem('userInterests');
+
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setSelectedInterestLabels(parsed);
+          console.log('PROFILE LOADED INTERESTS:', parsed);
+        }
+      };
+
+      loadSavedInterests();
+    }, [])
+  );
 
   const allInterests = INTEREST_ROWS.flat();
 
@@ -222,17 +238,27 @@ export default function ProfileScreen() {
     );
   };
 
-  const handleInterestDone = () => {
+  const handleInterestDone = async () => {
     if (editingSelectedIds.length < MIN_SELECTIONS) {
       setInterestError(true);
-    } else {
-      const newLabels = allInterests
-        .filter(i => editingSelectedIds.includes(i.id))
-        .map(i => i.label);
-      setSelectedInterestLabels(newLabels);
-      setInterestError(false);
-      setIsEditingInterests(false);
+      return;
     }
+
+    const newLabels = allInterests
+      .filter(i => editingSelectedIds.includes(i.id))
+      .map(i => i.label);
+
+    setSelectedInterestLabels(newLabels);
+
+    await AsyncStorage.setItem(
+      'userInterests',
+      JSON.stringify(newLabels)
+    );
+
+    console.log('PROFILE SAVED INTERESTS:', newLabels);
+
+    setInterestError(false);
+    setIsEditingInterests(false);
   };
 
   const handleSave = () => {

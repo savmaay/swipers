@@ -201,46 +201,57 @@ export default function InterestsScreen() {
 
 
   const navigate = async () => {
+    console.log('NAVIGATE STARTED');
     if (!canContinueRef.current || hasNavigated.current) return;
     hasNavigated.current = true;
 
     try {
-    const token = (params.token as string) || (await AsyncStorage.getItem('userToken'));
-
-    if (!token) {
-      alert("Session expired. Please log in again.");
-      router.replace('/login');
-      return;
-    }
+    const token =
+      (params.token as string) ||
+      (await AsyncStorage.getItem('userToken'));
       const allInterests = INTEREST_ROWS.flat();
-      const selectedLabels = selected.map(id => 
-        allInterests.find(item => item.id === id)?.label
+      const selectedLabels = selected
+        .map(id => allInterests.find(item => item.id === id)?.label)
+        .filter(Boolean);
+
+      await AsyncStorage.setItem(
+        'userInterests',
+        JSON.stringify(selectedLabels)
       );
 
-      const response = await fetch(`${API_BASE_URL}/api/auth/update-profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': token, 
-        },
-        body: JSON.stringify({
-          name: params.name,
-          year: params.year,
-          major: params.major,
-          bio: params.bio,
-          avatar: params.avatar,
-          interests: selectedLabels,
-          onboardingComplete: true,
-        }),
-      });
+      await AsyncStorage.setItem('onboardingComplete', 'true');
 
-      if (response.ok) {
-        router.replace('/(tabs)');
-      } else {
-        const errorData = await response.json();
-        alert(errorData.msg || "Something went wrong saving your profile.");
-        hasNavigated.current = false;
+      console.log('SELECTED IDS:', selected);
+      console.log('LABELS:', selectedLabels);
+
+      const verify = await AsyncStorage.getItem('userInterests');
+      console.log('JUST SAVED:', verify);
+
+      if (token) {
+        const response = await fetch(`${API_BASE_URL}/api/auth/update-profile`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-auth-token': token,
+          },
+          body: JSON.stringify({
+            name: params.name,
+            year: params.year,
+            major: params.major,
+            bio: params.bio,
+            avatar: params.avatar,
+            interests: selectedLabels,
+            onboardingComplete: true,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.log(errorData);
+        }
       }
+
+      router.replace('/(tabs)');
     } catch (error) {
       console.error("Network error:", error);
       alert("Could not connect to the server.");
@@ -296,8 +307,10 @@ export default function InterestsScreen() {
     >
       {/* PanResponder on the whole screen */}
       <Animated.View
-        style={[styles.wrapper, { opacity: fadeAnim, transform: [{ translateY: dragY }] }]}
-        {...panResponder.panHandlers}
+        style={[
+          styles.wrapper,
+          { opacity: fadeAnim, transform: [{ translateY: dragY }] }
+        ]}
       >
         {/* Header */}
         <View style={styles.header}>
@@ -328,7 +341,10 @@ export default function InterestsScreen() {
                   key={item.id}
                   item={item}
                   selected={selected.includes(item.id)}
-                  onPress={() => toggleInterest(item.id)}
+                  onPress={() => {
+                    console.log('CHIP PRESSED:', item.label);
+                    toggleInterest(item.id);
+                  }}
                 />
               ))}
             </View>
@@ -355,11 +371,7 @@ export default function InterestsScreen() {
             style={styles.continueGradient}
           >
             {canContinue ? (
-              <View style={styles.swipeUpRow}>
-                <AnimatedUpArrow />
-                <Text style={styles.continueText}>Swipe Up to Finish</Text>
-                <AnimatedUpArrow />
-              </View>
+              <Text style={styles.continueText}>Done</Text>
             ) : (
               <Text style={styles.continueText}>
                 Select {MIN_SELECTIONS - selectedCount} more
