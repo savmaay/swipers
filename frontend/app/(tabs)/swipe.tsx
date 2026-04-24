@@ -594,26 +594,8 @@ export default function SwipeScreen() {
     console.log('RAW STORAGE:', stored);
 
     const interests = stored ? JSON.parse(stored) : [];
-    console.log('PARSED INTERESTS:', interests);
-
-    if (!interests.length) {
-      const stored =
-        await AsyncStorage.getItem('adminEvents');
-
-      const custom = stored
-        ? JSON.parse(stored)
-        : [];
-
-      setEvents([
-        ...SAMPLE_EVENTS,
-        ...custom.map((e: any) => ({
-          ...e,
-          tags: e.interests,
-          color: COLORS.apricotBlush,
-        })),
-      ]);
-      return;
-    }
+    const storedAdmin = await AsyncStorage.getItem('adminEvents');
+    const custom = storedAdmin ? JSON.parse(storedAdmin) : [];
 
     const unseen = SAMPLE_EVENTS.filter(
       event => !seenIds.includes(event.id)
@@ -632,7 +614,16 @@ export default function SwipeScreen() {
       })
       .sort((a, b) => b.score - a.score);
 
-    setEvents(ranked);
+    const adminEvents = custom.map((e: any) => ({
+      ...e,
+      tags: e.interests || [],
+      color: COLORS.apricotBlush,
+    }));
+
+    setEvents([
+      ...ranked,
+      ...adminEvents
+    ]);;
   }, [seenIds]);
 
   useFocusEffect(
