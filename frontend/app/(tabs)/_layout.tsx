@@ -8,21 +8,14 @@ export default function TabLayout() {
   const router = useRouter();
   const segments = useSegments();
 
-  let activeTab = -1; // Default to -1 (nothing highlighted)
   const lastSegment = segments[segments.length - 1];
 
-  // Logic Change: Only highlight if strictly on the sub-pages
-  if (lastSegment === 'swipe') {
-    activeTab = 0;
-  } else if (lastSegment === 'groupchat') {
-    activeTab = 1;
-  } else if (lastSegment === 'calendar') {
-    activeTab = 2;
-  } else if (lastSegment === 'rating') {
-    activeTab = 3;
-  }
-  // If lastSegment is 'index' or '(tabs)', activeTab remains -1
-
+ // In TabLayout, update activeTab detection:
+  let activeTab = -1;
+  if (lastSegment === 'swipe') activeTab = 0;
+  else if (lastSegment === 'groupchat') activeTab = 1;
+  else if (lastSegment === 'calendar') activeTab = 2;
+  else if (lastSegment === 'rating') activeTab = 3;
   return (
     <Tabs
       screenOptions={{
@@ -33,13 +26,13 @@ export default function TabLayout() {
         <CustomTabBar
           activeTab={activeTab}
           router={router}
-          segments={segments}
+          lastSegment={lastSegment}
         />
       )}
     >
       <Tabs.Screen name="index" />
       <Tabs.Screen name="swipe" />
-      <Tabs.Screen name="explore" />
+      <Tabs.Screen name="groupchat" />
       <Tabs.Screen name="calendar" />
       <Tabs.Screen name="rating" />
     </Tabs>
@@ -47,76 +40,77 @@ export default function TabLayout() {
 }
 
 function CustomTabBar({
-  activeTab = 0,
+  activeTab,
   router,
-  segments,
+  lastSegment,
 }: {
-  activeTab?: number;
+  activeTab: number;
   router: any;
-  segments: string[];
+  lastSegment: string;
 }) {
-  const lastSegment = segments[segments.length - 1];
-
-  const icons = [
+  const tabs = [
     {
-      icon: activeTab === 0 ? 'swap-horizontal' : 'swap-horizontal-outline',
-      onPress: () => {
-        if (lastSegment === 'swipe') router.push('/(tabs)');
-        else router.push('/(tabs)/swipe');
-      },
+      active: 'swap-horizontal',
+      inactive: 'swap-horizontal-outline',
+      route: '/(tabs)/swipe',
+      key: 'swipe',
     },
     {
-      icon: activeTab === 1 ? 'chatbubbles' : 'chatbubbles-outline',
-      onPress: () => {
-      if (lastSegment === 'groupchat') {
-        router.push('/(tabs)'); 
-      } else {
-        router.push('/(tabs)/groupchat');
-      }
+      active: 'chatbubbles',
+      inactive: 'chatbubbles-outline',
+      route: '/(tabs)/groupchat',
+      key: 'groupchat',
     },
-  },
     {
-    icon: activeTab === 2 ? 'calendar' : 'calendar-outline',
-    onPress: () => {
-      if (lastSegment === 'calendar') {
-        router.push('/(tabs)'); 
-      } else {
-        router.push('/(tabs)/calendar');
-      }
+      active: 'calendar',
+      inactive: 'calendar-outline',
+      route: '/(tabs)/calendar',
+      key: 'calendar',
     },
-  },
     {
-      icon: activeTab === 3 ? 'star' : 'star-outline',
-      onPress: () => {
-        if (lastSegment === 'rating') router.push('/(tabs)');
-        else router.push('/(tabs)/rating');
-      },
+      active: 'star',
+      inactive: 'star-outline',
+      route: '/(tabs)/rating',
+      key: 'rating',
     },
   ];
 
   return (
     <View style={styles.tabBar}>
-      {icons.map((tab, index) => (
-        <TouchableOpacity
-          key={index}
-          style={styles.tabItem}
-          activeOpacity={0.7}
-          onPress={tab.onPress}
-        >
-          <View
-            style={[
-              styles.tabIconWrapper,
-              activeTab === index ? styles.tabIconActive : null,
-            ]}
+      {tabs.map((tab, index) => {
+        const isActive = activeTab === index;
+
+        return (
+          <TouchableOpacity
+            key={tab.key}
+            style={styles.tabItem}
+            activeOpacity={0.7}
+            onPress={() => {
+              const isOnSameTab = lastSegment === tab.key;
+
+              // 🔥 FIX: toggle behavior
+              if (isOnSameTab) {
+                router.replace('/(tabs)'); // go to dashboard
+              } else {
+                router.replace(tab.route); // go to tab
+              }
+            }}
           >
-            <Ionicons
-              name={tab.icon as any}
-              size={28}
-              color={activeTab === index ? '#fff' : COLORS.deepNavy}
-            />
-          </View>
-        </TouchableOpacity>
-      ))}
+            <View
+              style={[
+                styles.tabIconWrapper,
+                isActive && styles.tabIconActive,
+              ]}
+            >
+              <Ionicons
+                name={(isActive ? tab.active : tab.inactive) as any}
+                size={28}
+                color={isActive ? '#fff' : COLORS.deepNavy}
+              />
+            </View>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }
