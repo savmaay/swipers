@@ -56,14 +56,36 @@ export default function Index() {
   const fontsLoaded = useAppFonts();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
-  const userName = 'Diya';
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     const checkStatus = async () => {
-      const completed = await AsyncStorage.getItem('onboardingComplete');
-      if (completed !== 'true') setNeedsOnboarding(true);
+      const completed =
+        await AsyncStorage.getItem(
+          'onboardingComplete'
+        );
+
+      const storedName =
+        await AsyncStorage.getItem(
+          'profileName'
+        );
+
+      if (
+        storedName &&
+        storedName.trim() !== '' &&
+        storedName !== 'null' &&
+        storedName !== 'undefined'
+      ) {
+        setUserName(storedName.trim());
+      }
+
+      if (completed !== 'true') {
+        setNeedsOnboarding(true);
+      }
+
       setReady(true);
     };
+
     checkStatus();
   }, []);
 

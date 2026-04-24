@@ -105,7 +105,7 @@ export default function AdminDashboardScreen() {
 
   // TODO: replace with real admin data from auth context / API
   const [adminName, setAdminName] =
-    useState('Organization');
+    useState('');
 
   const [stats, setStats] = useState({
     eventsToday: 4,
@@ -125,7 +125,12 @@ export default function AdminDashboardScreen() {
       let storedName =
         await AsyncStorage.getItem('adminOrgName');
 
-      if (!storedName) {
+      if (
+        !storedName ||
+        storedName.trim() === '' ||
+        storedName === 'null' ||
+        storedName === 'undefined'
+      ) {
         storedName = 'Society of PC Building';
 
         await AsyncStorage.setItem(
@@ -133,6 +138,8 @@ export default function AdminDashboardScreen() {
           storedName
         );
       }
+
+      setAdminName(storedName.trim());
 
       setAdminName(storedName);
 
@@ -199,7 +206,7 @@ export default function AdminDashboardScreen() {
         ]}
       >
         <Text style={styles.welcomeText}>
-          Welcome back{'\n'}{adminName || '______'}!
+          Welcome back{'\n'}{adminName || 'Organization'}!
         </Text>
       </Animated.View>
 

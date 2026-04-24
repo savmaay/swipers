@@ -587,8 +587,21 @@ export default function SwipeScreen() {
   const [triggerSwipe, setTriggerSwipe] = useState<'left' | 'right' | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [seenIds, setSeenIds] = useState<string[]>([]);
+  const [ready, setReady] = useState(false);
   // Show summary automatically when all events are swiped
-  
+
+  useEffect(() => {
+    const loadSeen = async () => {
+      const stored = await AsyncStorage.getItem('seenEvents');
+      if (stored) {
+        setSeenIds(JSON.parse(stored));
+      }
+      setReady(true);
+    };
+
+    loadSeen();
+  }, []);
+
   const loadFeed = useCallback(async () => {
     const stored = await AsyncStorage.getItem('userInterests');
     console.log('RAW STORAGE:', stored);
@@ -614,11 +627,13 @@ export default function SwipeScreen() {
       })
       .sort((a, b) => b.score - a.score);
 
-    const adminEvents = custom.map((e: any) => ({
-      ...e,
-      tags: e.interests || [],
-      color: COLORS.apricotBlush,
-    }));
+    const adminEvents = custom
+      .filter((e: any) => !seenIds.includes(e.id))
+      .map((e: any) => ({
+        ...e,
+        tags: e.interests || [],
+        color: COLORS.apricotBlush,
+      }));
 
     setEvents([
       ...ranked,
@@ -628,9 +643,13 @@ export default function SwipeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      loadFeed();
-    }, [loadFeed])
+      if (ready) loadFeed();
+    }, [ready, loadFeed])
   );
+
+  useEffect(() => {
+    if (ready) loadFeed();
+  }, [seenIds, ready]);
 
   useEffect(() => {
     if (events.length === 0 && likedEvents.length > 0) {
@@ -643,9 +662,15 @@ export default function SwipeScreen() {
 
     setEvents(prev => {
       const removed = prev[0];
+
       if (removed) {
-        setSeenIds(ids => [...ids, removed.id]);
+        setSeenIds(ids => {
+          const updated = [...ids, removed.id];
+          AsyncStorage.setItem('seenEvents', JSON.stringify(updated));
+          return updated;
+        });
       }
+
       return prev.slice(1);
     });
   }, []);
@@ -726,7 +751,11 @@ export default function SwipeScreen() {
       if (liked) {
         setLikedEvents(current => [...current, liked]);
 
-        setSeenIds(ids => [...ids, liked.id]);
+        setSeenIds(ids => {
+          const updated = [...ids, liked.id];
+          AsyncStorage.setItem('seenEvents', JSON.stringify(updated));
+          return updated;
+        });
 
         saveToCalendar(liked);
       }
