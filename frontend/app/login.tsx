@@ -177,6 +177,7 @@ export default function LoginScreen() {
   const [password, setPassword]         = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe]     = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [loading, setLoading]           = useState<boolean>(false);
   const [error, setError]               = useState<boolean>(false);
   const [forgotVisible, setForgotVisible] = useState<boolean>(false);
@@ -196,17 +197,34 @@ export default function LoginScreen() {
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ 
+        email, 
+        password, 
+        role: isAdmin ? 'admin' : 'member' 
+      }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      console.log("SIGNUP RESPONSE:", text);
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { msg: text };
+      }
 
       if (response.ok) {
-        console.log("Login successful, token received");
         await AsyncStorage.setItem('userToken', data.token);
         setLoading(false);
-        router.replace('/(tabs)');
-      } else {
+
+        if (isAdmin) {
+          router.replace('/(admin-tabs)');
+        } else {
+          router.replace('/(tabs)');
+        }
+      }else {
         setError(true);
         setLoading(false);
       }
@@ -290,6 +308,15 @@ export default function LoginScreen() {
 
               {/* Remember Me + Forgot Password */}
               <View style={styles.row}>
+                <TouchableOpacity
+                  style={styles.checkboxRow}
+                  onPress={() => setIsAdmin(!isAdmin)}
+                >
+                  <View style={[styles.checkbox, isAdmin && styles.checkboxChecked]}>
+                    {isAdmin && <Ionicons name="checkmark" size={12} color="#fff" />}
+                  </View>
+                  <Text style={styles.rememberText}>Login as Admin</Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.checkboxRow}
                   onPress={() => setRememberMe(!rememberMe)}
@@ -448,12 +475,12 @@ const styles = StyleSheet.create({
   },
   rememberText: {
     fontFamily: FONTS.body,
-    fontSize: 13,
+    fontSize: 11,
     color: COLORS.softCobalt,
   },
   forgotText: {
     fontFamily: FONTS.body,
-    fontSize: 13,
+    fontSize: 11,
     color: COLORS.mutedSapphire,
     fontWeight: '600',
   },

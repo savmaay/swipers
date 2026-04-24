@@ -65,19 +65,39 @@ export default function SignupScreen() {
         }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      console.log("SIGNUP RESPONSE:", text);
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { msg: text };
+      }
 
       if (response.ok) {
   await AsyncStorage.setItem('userToken', data.token); 
   
-  router.replace({
-    pathname: '/onboarding', 
-    params: { 
-      token: data.token,
-      name: fullName 
+  // Route admins to admin onboarding, regular users to user onboarding
+    if (isAdmin) {
+      router.replace({
+        pathname: '/admin-onboarding', 
+        params: { 
+          token: data.token,
+          name: fullName 
+        }
+      });
+    } else {
+      router.replace({
+        pathname: '/onboarding', 
+        params: { 
+          token: data.token,
+          name: fullName 
+        }
+      });
     }
-  });
-} else {
+  } else {
         if (data.msg === "User already exists") {
           setErrorState('exists');
         } else {

@@ -312,11 +312,11 @@ const MonthlyView = ({ date, eventsFunc }: any) => {
 
   return (
     <View style={styles.monthlyBlueBox}>
-      <div style={styles.gridHeader}>
+      <View style={styles.gridHeader}>
         {['S','M','T','W','T','F','S'].map((d, i) => (
           <Text key={`hdr-${i}`} style={styles.gridHeaderText}>{d}</Text>
         ))}
-      </div>
+      </View>
       {rows.map((row, ri) => (
         <View key={`row-${ri}`} style={styles.gridRow}>
           {row.map((cell) => {
